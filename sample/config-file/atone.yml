@@ -1,0 +1,19 @@
+#!/usr/bin/env atone -c
+
+settings:
+    workdir: .
+
+services:
+    sleep-3:
+        command: sleep 3
+        restart: always
+
+    sleep-5:
+        command: sleep 5
+        depends_on: [ sleep-3 ]
+        restart: always
+
+    bash:
+        command: bash -c ls
+
+    tracer: ./tracer.sh -arg1 -arg 2

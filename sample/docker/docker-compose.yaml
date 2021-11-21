@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  docker-sample:
+    build: .
+    volumes:
+      - ../config-file:/srv/config:ro
+      - ../../build/release/bin/atone:/bin/atone:ro
