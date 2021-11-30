@@ -27,6 +27,7 @@ namespace Atone {
             static void ReapZombieProcess(pid_t pid = -1);
             static pid_t Spawn(const char *service_name, char *const argv[]);
             static int WaitSignal(siginfo_t *info);
+            static int WaitSignal(siginfo_t *info, timespec &timeout);
     };
 
 }

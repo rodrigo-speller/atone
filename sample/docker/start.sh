@@ -9,5 +9,5 @@ if [ ! -e "$ATONE" ]; then
     make -C "$ATONEDIR"
 fi
 
-docker-compose up --build --no-start docker-sample
-docker-compose run docker-sample
+docker-compose -f "$basename/docker-compose.yml" up --build --no-start docker-sample
+docker-compose -f "$basename/docker-compose.yml" run docker-sample

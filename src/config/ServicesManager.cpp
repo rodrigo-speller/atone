@@ -36,6 +36,17 @@ namespace Atone {
         }
     }
 
+    bool ServicesManager::isRunning() {
+        for (auto entry : services) {
+            auto service = entry.second;
+
+            if (service.isRunning())
+                return true;
+        }
+
+        return false;
+    }
+
     bool ServicesManager::TryGetService(pid_t pid, Service *result) {
         for (auto entry : services) {
             auto service = entry.second;
@@ -77,11 +88,17 @@ namespace Atone {
         }
     }
 
-    void ServicesManager::Stop() {
+    bool ServicesManager::Stop() {
+        auto success = true;
+
         for (auto entry : services) {
             auto service = entry.second;
-            service.Stop();
+
+            if (!service.Stop())
+                success = false;
         }
+
+        return success;
     }
 
     bool ServicesManager::CheckAllServices() {

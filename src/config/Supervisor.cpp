@@ -6,6 +6,7 @@
 
 #include "Supervisor.h"
 #include "logging/Log.h"
+#include "utils/time.h"
 
 namespace Atone {
     Supervisor *Supervisor::instance = new Supervisor();
@@ -109,7 +110,31 @@ namespace Atone {
 
         if ((signum = sigwaitinfo(&instance->atoneSigset, info)) == -1) {
             Log::crit("sigwait failed: %s", strerror(errno));
-            return 0;
+            return -1;
+        }
+
+        return signum;
+    }
+
+    int Supervisor::WaitSignal(siginfo_t *info, timespec &timeout) {
+        int signum;
+
+        timespec now;
+        timespec _timeout;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        if (timespec_diff(now, timeout, _timeout) == -1) {
+            _timeout.tv_sec = 0;
+            _timeout.tv_nsec = 0;
+        }
+
+        if ((signum = sigtimedwait(&instance->atoneSigset, info, &_timeout)) == -1) {
+            auto err = errno;
+
+            if (err == EAGAIN)
+                return 0;
+
+            Log::crit("sigwait failed: %s", strerror(err));
+            return -1;
         }
 
         return signum;

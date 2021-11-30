@@ -19,11 +19,13 @@ namespace Atone {
             ServicesManager(Service service);
             ServicesManager(YAML::Node document);
 
+            bool isRunning();
+
             bool TryGetService(pid_t pid, Service *result = NULL);
             bool TryGetService(const std::string name, Service *result = NULL);
 
             void Start();
-            void Stop();
+            bool Stop();
             bool CheckAllServices();
             bool CheckService(pid_t pid);
             bool CheckService(Service service);

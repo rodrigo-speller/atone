@@ -40,7 +40,19 @@ namespace Atone {
             bool canRestart();
 
             void Start();
-            void Stop();
+
+            /**
+             * Stops the service. If the service proceess is running, send a SIGTERM signal.
+             * 
+             * @return Returns true if the service is stopped or already is not running. Returns false if the service
+             * process is still running, after the signal is sent.
+             */
+            bool Stop(bool kill = false);
+
+            /**
+             * Checks if the service process is running.
+             * @return Returns true if the process is running.
+             */
             bool CheckProcessState();
     };
 

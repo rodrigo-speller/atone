@@ -82,25 +82,34 @@ namespace Atone {
         Log::info("%s: service started (PID=%i)", service_name, pid);
     }
 
-    void Service::Stop() {
+    bool Service::Stop(bool _kill) {
         auto service_name = config->name.c_str();
 
         Log::info("%s: stopping service", service_name);
 
         if (!CheckProcessState()) {
-            return;
+            return true;
         }
 
         auto pid = state->pid;
+        auto signal = _kill ? SIGKILL : SIGTERM;
 
-        if (kill(pid, SIGTERM) != 0) {
+        Log::trace("%s: sending signal to service process: %s", service_name, strsignal(signal));
+
+        if (kill(pid, signal) != 0) {
             auto _errno = errno;
-            Log::crit("%s: service process kill failed: %s", service_name, strerror(_errno));
-            throw std::system_error(_errno, std::system_category(), "kill failed");
+
+            if (_errno != ESRCH) {
+                Log::crit("%s: service process kill failed: %s", service_name, strerror(_errno));
+                throw std::system_error(_errno, std::system_category(), "kill failed");
+            }
         }
 
-        if (CheckProcessState())
-            throw AtoneException("invalid process state");
+        if (_kill) {
+            waitid(P_PID, pid, nullptr, WNOWAIT | WEXITED);
+        }
+
+        return !CheckProcessState();
     }
 
     bool Service::CheckProcessState() {
