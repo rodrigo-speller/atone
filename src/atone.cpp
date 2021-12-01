@@ -33,7 +33,7 @@ namespace Atone {
         options.LoadArgs(argc, argv);
 
         if (!options.errorMessage.empty()) { // options error
-            Log::fatal("load options failed: %s", options.errorMessage.c_str());
+            std::cerr << "load options failed: " << options.errorMessage << std::endl;
             return 1;
         }
 
