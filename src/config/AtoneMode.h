@@ -9,7 +9,8 @@ namespace Atone {
         Undefined,
         SingleService,
         MultiServices,
-        Help
+        Help,
+        Version,
     };
 
 }

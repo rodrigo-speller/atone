@@ -19,6 +19,7 @@ namespace Atone {
 
             AtoneMode mode = AtoneMode::Undefined;
             bool usage = false;
+            bool version = false;
 
             std::string errorMessage;
             std::string configFile = ATONE_OPTION_DEFAULT_CONFIGFILE;
@@ -31,6 +32,7 @@ namespace Atone {
             void LoadArgs(size_t argc, char **argv);
 
             static void PrintUsage(char *program);
+            static void PrintVersion();
 
         private:
             struct Option {

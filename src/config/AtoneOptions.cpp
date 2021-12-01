@@ -31,6 +31,7 @@ namespace Atone {
             {"log",    'l', OPTPARSE_REQUIRED, AtoneMode::Undefined    },
             {"logger", 'L', OPTPARSE_REQUIRED, AtoneMode::Undefined    },
             {"name",   'n', OPTPARSE_REQUIRED, AtoneMode::SingleService},
+            {"version",'v', OPTPARSE_NONE,     AtoneMode::Version      },
             NULL
         };
         const int options_len = sizeof(options) / sizeof(Option);
@@ -60,6 +61,9 @@ namespace Atone {
                     break;
                 case 'n':
                     serviceName = state.optarg;
+                    break;
+                case 'v':
+                    version = true;
                     break;
                 case '?':
                     errorMessage = state.errmsg;
@@ -125,9 +129,14 @@ namespace Atone {
             "                           Syslog:     Logs to system log.\n"
             "                           Null:       Don't logs.\n"
             "  -h, --help           Prints this help.\n"
+            "  -v, --version        Prints the version.\n"
             "\n"
             "Atone homepage: <https://github.com/rodrigo-speller/atone>\n"
         ;
+    }
+
+    void AtoneOptions::PrintVersion() {
+        std::cout << ATONE_BUILD_VERSION_STAMP << "\n";
     }
 
     LogLevel AtoneOptions::ParseLogLevel(const char *level) {

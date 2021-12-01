@@ -42,6 +42,11 @@ namespace Atone {
             return 0;
         }
 
+        if (options.version) { // version
+            AtoneOptions::PrintVersion();
+            return 0;
+        }
+
         // setup
 
         Logger *logger;
