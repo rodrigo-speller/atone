@@ -1,0 +1,40 @@
+name: Atone Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_version:
+        description: 'Build version'
+        required: true
+
+jobs:
+  pack:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04 ]
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Declare build variables
+      run: |
+        echo "ATONE_BUILD_VERSION=${{ github.event.inputs.package_version }}" >> $GITHUB_ENV
+        echo "ATONE_BUILD_NUMBER=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+    - name: Build
+      run: make
+
+    - name: Atone
+      run: build/release/bin/atone --version
+
+    - name: Declare artifact variables
+      run: |
+        echo "ATONE_ARTIFACT_NAME=$(build/release/bin/atone --version | awk -F ' ' '{print "atone-" $1 "-" $4}')" >> $GITHUB_ENV
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.ATONE_ARTIFACT_NAME }}
+        path: build/release/bin/atone
