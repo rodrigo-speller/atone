@@ -43,6 +43,14 @@ ifneq ($(VERBOSE), 0)
     CXXFLAGS+=-v
 endif
 
+ifdef ATONE_BUILD_VERSION
+    CXXFLAGS+=-D "ATONE_BUILD_VERSION=\"$(ATONE_BUILD_VERSION)\""
+endif
+
+ifdef ATONE_BUILD_NUMBER
+    CXXFLAGS+=-D "ATONE_BUILD_NUMBER=\"$(ATONE_BUILD_NUMBER)\""
+endif
+
 # default directories
 
 SRCDIR?=src

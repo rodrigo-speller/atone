@@ -95,7 +95,7 @@ namespace Atone {
         program = basename(program);
 
         std::cout << 
-            "Atone, version " << ATONE_VERSION << "\n"
+            "Atone, version " << ATONE_BUILD_VERSION_STAMP << "\n"
             "\n"
             "Starts a supervisor process that defines and runs services.\n"
             "\n"

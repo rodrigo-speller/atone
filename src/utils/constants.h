@@ -1,9 +1,7 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#ifndef ATONE_VERSION
-#define ATONE_VERSION "0.0-devel-(x86_64-pc-linux)"
-#endif
+#include "constants_build.h"
 
 #define ATONE_OPTION_DEFAULT_CONFIGFILE "/etc/atone.yaml"
 #define ATONE_OPTION_DEFAULT_SERVICENAME "main"

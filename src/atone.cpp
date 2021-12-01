@@ -25,12 +25,6 @@ namespace Atone {
     int main(int argc, char **argv) {
         auto atone_pid = getpid();
 
-        if (atone_pid != 1) {
-            throw AtoneException("atone must run as init process (pid must be 1)");
-        }
-
-        timespec a;
-        clock_gettime(CLOCK_MONOTONIC, &a);
         Log::info("starting... (PID=%i)", atone_pid);
 
         // parse args
@@ -66,6 +60,10 @@ namespace Atone {
         Log::set(logger);
 
         // start
+
+        if (atone_pid != 1) {
+            throw AtoneException("atone must run as init process (pid must be 1)");
+        }
 
         auto atone = Atone::Context(options);
         auto services = atone.services;
