@@ -76,15 +76,10 @@ void optparse_init(struct optparse *options, char **argv);
 
 /**
  * Read the next option in the argv array.
- * @param optstring a getopt()-formatted option string.
  * @return the next option character, -1 for done, or '?' for error
- *
- * Just like getopt(), a character followed by no colons means no
- * argument. One colon means the option has a required argument. Two
- * colons means the option takes an optional argument.
  */
 OPTPARSE_API
-int optparse(struct optparse *options, const char *optstring);
+int optparse(struct optparse *options, const struct optparse_long *longopts);
 
 /**
  * Handles GNU-style long options in addition to getopt() options.
@@ -162,22 +157,19 @@ optparse_is_longopt(const char *arg)
 }
 
 static int
-optparse_argtype(const char *optstring, char c)
+optparse_argtype(const struct optparse_long *longopts, char c)
 {
-    int count = OPTPARSE_NONE;
-    if (c == ':')
+    for (; longopts && c != longopts->shortname; longopts++);
+
+    if (!longopts)
         return -1;
-    for (; *optstring && c != *optstring; optstring++);
-    if (!*optstring)
-        return -1;
-    if (optstring[1] == ':')
-        count += optstring[2] == ':' ? 2 : 1;
-    return count;
+
+    return longopts->argtype;
 }
 
 OPTPARSE_API
 int
-optparse(struct optparse *options, const char *optstring)
+optparse(struct optparse *options, const struct optparse_long *longopts)
 {
     int type;
     char *next;
@@ -191,11 +183,11 @@ optparse(struct optparse *options, const char *optstring)
         options->optind++; /* consume "--" */
         return -1;
     } else if (!optparse_is_shortopt(option)) {
-            return -1;
+        return -1;
     }
     option += options->subopt + 1;
     options->optopt = option[0];
-    type = optparse_argtype(optstring, option[0]);
+    type = optparse_argtype(longopts, option[0]);
     next = options->argv[options->optind + 1];
     switch (type) {
     case -1: {
@@ -256,22 +248,6 @@ optparse_longopts_end(const struct optparse_long *longopts, int i)
     return !longopts[i].longname && !longopts[i].shortname;
 }
 
-static void
-optparse_from_long(const struct optparse_long *longopts, char *optstring)
-{
-    char *p = optstring;
-    int i;
-    for (i = 0; !optparse_longopts_end(longopts, i); i++) {
-        if (longopts[i].shortname && longopts[i].shortname < 127) {
-            int a;
-            *p++ = longopts[i].shortname;
-            for (a = 0; a < (int)longopts[i].argtype; a++)
-                *p++ = ':';
-        }
-    }
-    *p = '\0';
-}
-
 /* Unlike strcmp(), handles options containing "=". */
 static int
 optparse_longopts_match(const char *longname, const char *option)
@@ -302,9 +278,7 @@ optparse_long_fallback(struct optparse *options,
                        int *longindex)
 {
     int result;
-    char optstring[96 * 3 + 1]; /* 96 ASCII printable characters */
-    optparse_from_long(longopts, optstring);
-    result = optparse(options, optstring);
+    result = optparse(options, longopts);
     if (longindex != 0) {
         *longindex = -1;
         if (result != -1) {
@@ -333,7 +307,7 @@ optparse_long(struct optparse *options,
     } else if (optparse_is_shortopt(option)) {
         return optparse_long_fallback(options, longopts, longindex);
     } else if (!optparse_is_longopt(option)) {
-            return -1;
+        return -1;
     }
 
     /* Parse as long option. */
