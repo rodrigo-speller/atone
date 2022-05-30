@@ -10,10 +10,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/debug/bin/atone",
             "args": [
-                "-c",
-                "${workspaceFolder}/sample/config-file/atone.yml",
-                "-L",
-                "Terminal"
+                "--config=${workspaceFolder}/sample/config-file/atone.yml",
+                "--logger=terminal"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
