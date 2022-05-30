@@ -33,12 +33,13 @@
  * always be in English rather than the current locale.
  *
  * Optparse should be familiar with anyone accustomed to getopt(), and
- * it could be a nearly drop-in replacement. The option string is the
- * same and the fields have the same names as the getopt() global
- * variables (optarg, optind, optopt).
+ * it could be a nearly drop-in replacement. The fields have the same
+ * names as the getopt() global variables (optarg, optind, optopt).
  *
  * Optparse also supports GNU-style long options with optparse_long().
  * The interface is slightly different and simpler than getopt_long().
+ * 
+ * Original source: https://github.com/skeeto/optparse
  */
 #ifndef OPTPARSE_H
 #define OPTPARSE_H
@@ -48,12 +49,18 @@
 #endif
 
 struct optparse {
+    /** Original parsing argurments. */
     char **argv;
+    /** Current argument index. */
     int optind;
+    /** Current option shortname. */
     int optopt;
+    /** Current option argument. */
     char *optarg;
-    char errmsg[64];
+    /* Aggregated short option index */
     int subopt;
+    /** Current error message. */
+    char errmsg[64];
 };
 
 enum optparse_argtype {
@@ -63,8 +70,11 @@ enum optparse_argtype {
 };
 
 struct optparse_long {
+    /** Long option name. */
     const char *longname;
+    /** Short option name. */
     int shortname;
+    /** Option argument type. */
     enum optparse_argtype argtype;
 };
 
