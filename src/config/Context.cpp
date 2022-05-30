@@ -52,6 +52,10 @@ namespace Atone {
 
         }
 
+        if (!workdir.empty()) {
+            std::filesystem::current_path(workdir);
+        }
+
         this->services = services;
 
     }

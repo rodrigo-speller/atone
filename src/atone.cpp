@@ -73,10 +73,6 @@ namespace Atone {
         auto atone = Atone::Context(options);
         auto services = atone.services;
 
-        if (!atone.workdir.empty()) {
-            std::filesystem::current_path(atone.workdir);
-        }
-
         services.Start();
 
         // running
