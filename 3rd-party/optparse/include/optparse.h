@@ -39,10 +39,6 @@
  *
  * Optparse also supports GNU-style long options with optparse_long().
  * The interface is slightly different and simpler than getopt_long().
- *
- * By default, argv is permuted as it is parsed, moving non-option
- * arguments to the end. This can be disabled by setting the `permute`
- * field to 0 after initialization.
  */
 #ifndef OPTPARSE_H
 #define OPTPARSE_H
@@ -53,7 +49,6 @@
 
 struct optparse {
     char **argv;
-    int permute;
     int optind;
     int optopt;
     char *optarg;
@@ -142,7 +137,6 @@ void
 optparse_init(struct optparse *options, char **argv)
 {
     options->argv = argv;
-    options->permute = 1;
     options->optind = 1;
     options->subopt = 0;
     options->optarg = 0;
@@ -165,16 +159,6 @@ static int
 optparse_is_longopt(const char *arg)
 {
     return arg != 0 && arg[0] == '-' && arg[1] == '-' && arg[2] != '\0';
-}
-
-static void
-optparse_permute(struct optparse *options, int index)
-{
-    char *nonoption = options->argv[index];
-    int i;
-    for (i = index; i < options->optind - 1; i++)
-        options->argv[i] = options->argv[i + 1];
-    options->argv[options->optind - 1] = nonoption;
 }
 
 static int
@@ -207,15 +191,7 @@ optparse(struct optparse *options, const char *optstring)
         options->optind++; /* consume "--" */
         return -1;
     } else if (!optparse_is_shortopt(option)) {
-        if (options->permute) {
-            int index = options->optind++;
-            int r = optparse(options, optstring);
-            optparse_permute(options, index);
-            options->optind--;
-            return r;
-        } else {
             return -1;
-        }
     }
     option += options->subopt + 1;
     options->optopt = option[0];
@@ -357,15 +333,7 @@ optparse_long(struct optparse *options,
     } else if (optparse_is_shortopt(option)) {
         return optparse_long_fallback(options, longopts, longindex);
     } else if (!optparse_is_longopt(option)) {
-        if (options->permute) {
-            int index = options->optind++;
-            int r = optparse_long(options, longopts, longindex);
-            optparse_permute(options, index);
-            options->optind--;
-            return r;
-        } else {
             return -1;
-        }
     }
 
     /* Parse as long option. */

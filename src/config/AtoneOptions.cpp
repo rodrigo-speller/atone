@@ -23,7 +23,6 @@ namespace Atone {
         struct optparse state;
 
         optparse_init(&state, argv);
-        state.permute = 0;
 
         struct Option options[] = {
             {"config", 'c', OPTPARSE_REQUIRED, AtoneMode::MultiServices},
