@@ -107,6 +107,7 @@ namespace Atone {
             "  " << program << " [-c <file>] [options] \n"
             "  " << program << " [-n <name>] [options] [--] <cmd> <args...>\n"
             "  " << program << " -h|--help\n"
+            "  " << program << " -v|--version\n"
             "\n"
             "Multi-services mode options:\n"
             "  -c, --config FILE    Specifies the configuration file.\n"
