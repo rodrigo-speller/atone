@@ -307,11 +307,11 @@ optparse_long(struct optparse *options,
 
             options->optopt = longopts[i].shortname;
             arg = optparse_longopts_arg(option);
-            if (longopts[i].argtype == OPTPARSE_NONE && arg != 0) {
-                return optparse_error(options, OPTPARSE_MSG_TOOMANY, name);
-            }
             
             if (arg != 0) {
+                if (longopts[i].argtype == OPTPARSE_NONE) {
+                return optparse_error(options, OPTPARSE_MSG_TOOMANY, name);
+            }
                 options->optarg = arg;
             } else if (longopts[i].argtype == OPTPARSE_REQUIRED) {
                 options->optarg = options->argv[options->optind];
