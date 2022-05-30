@@ -25,7 +25,7 @@ namespace Atone {
         optparse_init(&state, argv);
 
         struct Option options[] = {
-            {"config", 'c', OPTPARSE_REQUIRED, AtoneMode::MultiServices},
+            {"config", 'c', OPTPARSE_OPTIONAL, AtoneMode::MultiServices},
             {"help",   'h', OPTPARSE_NONE,     AtoneMode::Help         },
             {"log",    'l', OPTPARSE_REQUIRED, AtoneMode::Undefined    },
             {"logger", 'L', OPTPARSE_REQUIRED, AtoneMode::Undefined    },
@@ -47,7 +47,9 @@ namespace Atone {
 
             switch (option.parser.shortname) {
                 case 'c':
-                    configFile = state.optarg;
+                    if (state.optarg) {
+                        configFile = state.optarg;
+                    }
                     break;
                 case 'h':
                     usage = true;
@@ -78,6 +80,7 @@ namespace Atone {
         }
 
         if (errorMessage.empty()) { // no error post execution
+            // check for remaining args
             if (argv[state.optind]) {
                 if (mode == AtoneMode::Undefined) {
                     mode = AtoneMode::SingleService;
@@ -103,31 +106,31 @@ namespace Atone {
             "Starts a supervisor process that defines and runs services.\n"
             "\n"
             "Usage:\n"
-            "  " << program << " [-c <file>] [options] \n"
-            "  " << program << " [-n <name>] [options] [--] <cmd> <args...>\n"
+            "  " << program << " --config[=<file>] [options] \n"
+            "  " << program << " [--name=<name>] [options] [--] <cmd> <args...>\n"
             "  " << program << " -h|--help\n"
             "  " << program << " -v|--version\n"
             "\n"
             "Multi-services mode options:\n"
-            "  -c, --config FILE    Specifies the configuration file.\n"
+            "  -c, --config=FILE    Specifies the configuration file.\n"
             "                       (default: " << ATONE_OPTION_DEFAULT_CONFIGFILE << ")\n"
             "\n"
             "Single-service mode options:\n"
-            "  -n, --name           Specifies the service name.\n"
+            "  -n, --name=NAME      Specifies the service name.\n"
             "                       (default: " << ATONE_OPTION_DEFAULT_SERVICENAME << ")\n"
             "\n"
             "General options:\n"
-            "  -l, --log LEVEL      Defines the minimum log level.\n"
-            "                       (default: Trace)\n"
+            "  -l, --log=LEVEL      Defines the minimum log level.\n"
+            "                       (default: trace)\n"
             "                       The value must be one of:\n"
-            "                           Emergency, Fatal, Critical, Error, Warning, Notice, Information, Debug or Trace.\n"
-            "  -L, --logger LOGGER  Defines the logger type.\n"
-            "                       (default: \"Terminal\" for tty attached or \"Output\")\n"
+            "                           emergency, fatal, critical, error, warning, notice, information, debug or trace.\n"
+            "  -L, --logger=LOGGER  Defines the logger type.\n"
+            "                       (default: \"terminal\" for tty attached or \"output\")\n"
             "                       The value must be one of:\n"
-            "                           Output:     Logs to the output.\n"
-            "                           Terminal:   Logs to the output.\n"
-            "                           Syslog:     Logs to system log.\n"
-            "                           Null:       Don't logs.\n"
+            "                           output:     Logs to the output.\n"
+            "                           terminal:   Logs to the output.\n"
+            "                           syslog:     Logs to system log.\n"
+            "                           null:       Don't logs.\n"
             "  -h, --help           Prints this help.\n"
             "  -v, --version        Prints the version.\n"
             "\n"
