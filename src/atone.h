@@ -12,4 +12,7 @@ namespace Atone {
 
     void kill_all_process(ServicesManager &services, timespec timeout);
     bool stop_all_services(ServicesManager &services, timespec timeout);
+
+    void PrintUsage(char *program);
+    void PrintVersion();
 }

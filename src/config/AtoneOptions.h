@@ -31,9 +31,6 @@ namespace Atone {
 
             void LoadArgs(size_t argc, char **argv);
 
-            static void PrintUsage(char *program);
-            static void PrintVersion();
-
         private:
             struct Option {
                 struct optparse_long parser;
