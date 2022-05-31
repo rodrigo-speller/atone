@@ -3,6 +3,8 @@
 
 #include <sys/wait.h>
 #include <unistd.h>
+#include <string.h>
+#include <system_error>
 
 #include "Supervisor.h"
 #include "logging/Log.h"

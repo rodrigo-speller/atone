@@ -5,59 +5,38 @@
 
 #include <filesystem>
 #include <libgen.h>
+#include <string>
 
+#include "config/AtoneOptions.h"
+#include "config/Context.h"
+#include "config/Service.h"
+#include "config/ServiceConfig.h"
+#include "config/ServicesManager.h"
+#include "config/yaml/YamlConfigParser.h"
 #include "exception/AtoneException.h"
 
 namespace Atone {
+    Context::Context(ServicesManager services, std::string workdir)
+        : services(services), workdir(workdir) {
+    }
 
-    Context::Context(AtoneOptions options) {
-
-        ServicesManager services;
-
+    Context Context::FromOptions(AtoneOptions options) {
         switch (options.mode) {
-
             case AtoneMode::SingleService: {
                 auto service_cfg = new ServiceConfig(options.serviceName);
                 service_cfg->SetCommandArgs(options.commandArgc, options.commandArgv);
                 auto service = Service(service_cfg);
-                services = ServicesManager(service);
-                break;
+                auto services = ServicesManager(service);
+                return Context(services, 0);
             }
 
             case AtoneMode::MultiServices: {
-                auto config_file_opt = options.configFile;
-                auto config_file_path = std::filesystem::path(options.configFile);
-                auto config_path = config_file_path.parent_path();
-
-                auto config = YAML::LoadFile(options.configFile);
-
-                auto settings_node = config["settings"];
-
-                if (settings_node.Type() == YAML::NodeType::Map) {
-                    auto workdir_node = settings_node["workdir"];
-
-                    if (workdir_node.Type() == YAML::NodeType::Scalar) {
-                        this->workdir = config_path.append(workdir_node.as<std::string>());
-                    }
-                }
-
-                services = ServicesManager(config);
-
-                break;
+                return YamlConfigParser().ParseDocument(options.configFile);
             }
 
             default: {
                 throw AtoneException("unexpected mode");
             }
-
         }
-
-        if (!workdir.empty()) {
-            std::filesystem::current_path(workdir);
-        }
-
-        this->services = services;
-
     }
-
 }

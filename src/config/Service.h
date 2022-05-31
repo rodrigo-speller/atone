@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include <string.h>
+#include <memory>
+#include <string>
 
 #include "ServiceConfig.h"
 #include "ServiceStatus.h"
@@ -24,8 +25,6 @@ namespace Atone {
         public:
             Service();
             Service(ServiceConfig *config);
-
-            static Service FromConfig(std::string name, YAML::Node config);
 
             std::string name();
             size_t argc();

@@ -4,9 +4,11 @@
 #include "Service.h"
 
 #include <assert.h>
+#include <memory>
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <system_error>
 
 #include "Supervisor.h"
 #include "ServiceConfig.h"
@@ -21,11 +23,6 @@ namespace Atone {
     Service::Service(ServiceConfig *config) {
         this->config = std::shared_ptr<ServiceConfig>(config);
         this->state = std::shared_ptr<ServiceState>(new ServiceState());
-    }
-
-    Service Service::FromConfig(std::string name, YAML::Node config) {
-        auto state = ServiceConfig::FromConfig(name, config);
-        return Service(state);
     }
 
     std::string Service::name() { return config->name; }

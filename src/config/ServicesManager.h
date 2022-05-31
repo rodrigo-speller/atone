@@ -17,7 +17,7 @@ namespace Atone {
         public:
             ServicesManager();
             ServicesManager(Service service);
-            ServicesManager(YAML::Node document);
+            ServicesManager(std::map<std::string, Service> services);
 
             bool isRunning();
 

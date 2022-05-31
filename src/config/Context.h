@@ -5,17 +5,16 @@
 
 #include <string>
 
-#include "AtoneOptions.h"
-#include "ServicesManager.h"
+#include "config/AtoneOptions.h"
+#include "config/ServicesManager.h"
 
 namespace Atone {
-
     class Context {
-        public:
-            ServicesManager services;
-            std::string workdir;
+    public:
+        ServicesManager services;
+        std::string workdir;
 
-            Context(AtoneOptions options);
+        Context(ServicesManager services, std::string workdir);
+        static Context FromOptions(AtoneOptions options);
     };
-
 }

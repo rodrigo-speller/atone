@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "yaml-cpp/yaml.h"
+#include <string>
+#include <vector>
 
 #include "ServiceRestartMode.h"
 
@@ -20,15 +21,9 @@ namespace Atone {
             std::vector<std::string> depends_on;
             ServiceRestartMode restart = ServiceRestartMode::No;
 
-            static ServiceConfig *FromConfig(std::string name, YAML::Node config);
-
-            void SetCommandArgs(YAML::Node command);
             void SetCommandArgs(std::string command);
             void SetCommandArgs(size_t argc, char **argv);
             void FreeCommandArgs();
-
-            void SetDependsOn(YAML::Node depends_on);
-            void SetRestartMode(YAML::Node restart);
     };
 
 }

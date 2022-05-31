@@ -17,23 +17,8 @@ namespace Atone {
         this->services.insert(std::pair(service.name(), service));
     }
 
-    ServicesManager::ServicesManager(YAML::Node document) {
-        const auto services_node = document["services"];
-
-        if (!services_node) {
-            throw std::domain_error("services not found");
-        }
-
-        if (services_node.Type() != YAML::NodeType::Map) {
-            throw std::domain_error("invalid services section value");
-        }
-
-        for (auto entry : services_node) {
-            auto service_name = entry.first.as<std::string>();
-            auto service = Service::FromConfig(service_name, entry.second);
-
-            this->services.insert(std::pair(service_name, service));
-        }
+    ServicesManager::ServicesManager(std::map<std::string, Service> services) {
+        this->services = services;
     }
 
     bool ServicesManager::isRunning() {

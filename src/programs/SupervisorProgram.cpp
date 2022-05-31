@@ -3,8 +3,10 @@
 
 #include "SupervisorProgram.h"
 
+#include <filesystem>
 #include <iostream>
 #include <sys/wait.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "exception/AtoneException.h"
@@ -31,8 +33,12 @@ namespace Atone {
             throw AtoneException("atone must run as init process (pid must be 1)");
         }
 
-        auto atone = Atone::Context(options);
+        auto atone = Context::FromOptions(options);
         auto services = atone.services;
+
+        if (!atone.workdir.empty()) {
+            std::filesystem::current_path(atone.workdir);
+        }
 
         services.Start();
 

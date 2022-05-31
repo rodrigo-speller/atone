@@ -62,7 +62,7 @@ CLEAN+=$(TARGETDIR)
 
 # artifacts
 
-SOURCES=$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/**/*.cpp)
+SOURCES=$(shell find "$(SRCDIR)" -name *.cpp)
 OBJECTS=$(SOURCES:%.cpp=$(OBJDIR)/%.o)
 
 # internal targets
