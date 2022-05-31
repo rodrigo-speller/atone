@@ -18,8 +18,6 @@
 #include "logging/TerminalLogger.h"
 #include "utils/time.h"
 
-#define ATONE_LIMIT(v, min, max) (v < min ? min : (v > max ? max : v))
-
 namespace Atone {
 
     int main(int argc, char **argv) {
