@@ -1,66 +1,30 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#include "atone.h"
+#include "SupervisorProgram.h"
 
-#include <filesystem>
 #include <iostream>
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "exception/AtoneException.h"
 #include "config/AtoneOptions.h"
 #include "config/Context.h"
-#include "config/ServicesManager.h"
 #include "config/Supervisor.h"
-#include "exception/AtoneException.h"
 #include "logging/Log.h"
-#include "logging/OutputLogger.h"
-#include "logging/TerminalLogger.h"
+#include "utils/constants.h"
 #include "utils/time.h"
 
 namespace Atone {
+    bool reap_processes(ServicesManager &services, bool restart = false);
 
-    int main(int argc, char **argv) {
+    void kill_all_process(ServicesManager &services, timespec timeout);
+    bool stop_all_services(ServicesManager &services, timespec timeout);
+
+    int SupervisorProgram::Run(AtoneOptions &options) {
         auto atone_pid = getpid();
 
         Log::info("starting... (PID=%i)", atone_pid);
-
-        // parse args
-
-        AtoneOptions options;
-        options.LoadArgs(argc, argv);
-
-        if (!options.errorMessage.empty()) { // options error
-            std::cerr << "load options failed: " << options.errorMessage << std::endl;
-            return 1;
-        }
-
-        if (options.usage) { // usage
-            PrintUsage(argv[0]);
-            return 0;
-        }
-
-        if (options.version) { // version
-            PrintVersion();
-            return 0;
-        }
-
-        // setup
-
-        Logger *logger;
-
-        if (options.loggerFactory) {
-            logger = options.loggerFactory(options);
-        } else {
-            // default logger
-            if (isatty(1)) {
-                logger = new TerminalLogger(options.logLevel);
-            } else {
-                logger = new OutputLogger(options.logLevel);
-            }
-        }
-
-        Log::set(logger);
 
         // start
 
@@ -121,6 +85,7 @@ namespace Atone {
         return 0;
     }
 
+    
     bool reap_processes(ServicesManager &services, bool restart_services) {
         siginfo_t siginfo;
 
@@ -256,50 +221,4 @@ namespace Atone {
 
         return true;
     }
-
-    void PrintUsage(char *program) {
-        program = basename(program);
-
-        std::cout << 
-            "Atone, version " << ATONE_BUILD_VERSION_STAMP << "\n"
-            "\n"
-            "Starts a supervisor process that defines and runs services.\n"
-            "\n"
-            "Usage:\n"
-            "  " << program << " --config[=<file>] [options] \n"
-            "  " << program << " [--name=<name>] [options] [--] <cmd> <args...>\n"
-            "  " << program << " -h|--help\n"
-            "  " << program << " -v|--version\n"
-            "\n"
-            "Multi-services mode options:\n"
-            "  -c, --config=FILE    Specifies the configuration file.\n"
-            "                       (default: " << ATONE_OPTION_DEFAULT_CONFIGFILE << ")\n"
-            "\n"
-            "Single-service mode options:\n"
-            "  -n, --name=NAME      Specifies the service name.\n"
-            "                       (default: " << ATONE_OPTION_DEFAULT_SERVICENAME << ")\n"
-            "\n"
-            "General options:\n"
-            "  -l, --log=LEVEL      Defines the minimum log level.\n"
-            "                       (default: trace)\n"
-            "                       The value must be one of:\n"
-            "                           emergency, fatal, critical, error, warning, notice, information, debug or trace.\n"
-            "  -L, --logger=LOGGER  Defines the logger type.\n"
-            "                       (default: \"terminal\" for tty attached or \"output\")\n"
-            "                       The value must be one of:\n"
-            "                           output:     Logs to the output.\n"
-            "                           terminal:   Logs to the output.\n"
-            "                           syslog:     Logs to system log.\n"
-            "                           null:       Don't logs.\n"
-            "  -h, --help           Prints this help.\n"
-            "  -v, --version        Prints the version.\n"
-            "\n"
-            "Atone homepage: <https://github.com/rodrigo-speller/atone>\n"
-        ;
-    }
-
-    void PrintVersion() {
-        std::cout << ATONE_BUILD_VERSION_STAMP << "\n";
-    }
-
 }

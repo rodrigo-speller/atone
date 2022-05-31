@@ -18,7 +18,7 @@ namespace Atone {
 
             case AtoneMode::SingleService: {
                 auto service_cfg = new ServiceConfig(options.serviceName);
-                service_cfg->SetCommandArgs(options.argc, options.argv);
+                service_cfg->SetCommandArgs(options.commandArgc, options.commandArgv);
                 auto service = Service(service_cfg);
                 services = ServicesManager(service);
                 break;

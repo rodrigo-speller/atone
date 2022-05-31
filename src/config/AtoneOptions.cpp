@@ -15,11 +15,13 @@
 #include "logging/OutputLogger.h"
 #include "logging/SyslogLogger.h"
 #include "logging/TerminalLogger.h"
-#include "utils/constants.h"
 
 namespace Atone {
 
     void AtoneOptions::LoadArgs(size_t argc, char **argv) {
+        this->argc = argc;
+        this->argv = argv;
+
         struct optparse state;
 
         optparse_init(&state, argv);
@@ -92,8 +94,8 @@ namespace Atone {
             }
             
             if (mode == AtoneMode::SingleService) {
-                this->argc = argc - state.optind;
-                this->argv = &argv[state.optind];
+                this->commandArgc = argc - state.optind;
+                this->commandArgv = &argv[state.optind];
             }
             else {
                 errorMessage = "invalid arguments";

@@ -26,6 +26,8 @@ namespace Atone {
             std::string serviceName = ATONE_OPTION_DEFAULT_SERVICENAME;
             size_t argc = 0;
             char **argv = NULL;
+            size_t commandArgc = 0;
+            char **commandArgv = NULL;
             LoggerFactory loggerFactory = 0;
             LogLevel logLevel = LogLevel::Trace;
 
