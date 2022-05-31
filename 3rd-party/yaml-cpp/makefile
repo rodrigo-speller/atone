@@ -1,29 +1,22 @@
 # project targets
 
-all: atone
-atone: build
+all: yaml-cpp
+yaml-cpp: build
 build: before-build build-core after-build
 rebuild: clean build
+install: before-install install-core after-install
 
-.PHONY: clean build rebuild atone
+.PHONY: clean build rebuild yaml-cpp
 
 # project configuration
 
-LIBRARY+=yaml-cpp
-
-LIBRARY_PATH+=3rd-party/yaml-cpp/lib
-
 INCLUDE_PATH+=$(SRCDIR)
-INCLUDE_PATH+=3rd-party/optparse/include
-INCLUDE_PATH+=3rd-party/yaml-cpp/include
-
+INCLUDE_PATH+=include
+ARFLAGS=rc
 CXXFLAGS+=-Wall
 CXXFLAGS+=-fdiagnostics-color=always
 CXXFLAGS+=-std=c++17
-CXXFLAGS+=-MMD
 CXXFLAGS+=$(foreach d, $(INCLUDE_PATH), -I$d)
-LDFLAGS+=$(foreach d, $(LIBRARY_PATH), -L$d)
-LDLIBS+=$(foreach d, $(LIBRARY), -l$d)
 
 #-----------------------------------------------------------------------
 
@@ -31,30 +24,22 @@ DEBUG?=0
 VERBOSE?=0
 
 ifneq ($(DEBUG), 0)
-	TARGET=debug
+    TARGET=debug
     CXXFLAGS+=-g
-	CXXFLAGS+=-Og
+    CXXFLAGS+=-Og
 else
-	TARGET=release
-    CXXFLAGS+=-Os -ffunction-sections -fdata-sections
-    LDFLAGS+=-Wl,--gc-sections -s
+    TARGET=release
+    CXXFLAGS+=-Os
 endif
 
 ifneq ($(VERBOSE), 0)
     CXXFLAGS+=-v
 endif
 
-ifdef ATONE_BUILD_VERSION
-    CXXFLAGS+=-D "ATONE_BUILD_VERSION=\"$(ATONE_BUILD_VERSION)\""
-endif
-
-ifdef ATONE_BUILD_NUMBER
-    CXXFLAGS+=-D "ATONE_BUILD_NUMBER=\"$(ATONE_BUILD_NUMBER)\""
-endif
-
 # default directories
 
 SRCDIR?=src
+INSTALLDIR?=lib
 BUILDDIR?=build
 TARGETDIR?=$(BUILDDIR)/$(TARGET)
 OUTDIR?=$(TARGETDIR)/bin
@@ -68,17 +53,19 @@ OBJECTS=$(SOURCES:%.cpp=$(OBJDIR)/%.o)
 
 # internal targets
 
+# BUILD
+
 before-build:
 	@echo "Building..."
 	@echo "  Target: $(TARGET)"
 	@echo "  Output directory: $(OUTDIR)"
 	@-mkdir -p $(OUTDIR) $(dir $(OBJECTS))
 
-build-core: $(OUTDIR)/atone
+build-core: $(OUTDIR)/yaml-cpp.a
 
-$(OUTDIR)/atone: $(OBJECTS)
-	@echo "  Linking $@"
-	@$(CXX) $(LDFLAGS) -o $(OUTDIR)/atone $(OBJECTS) $(LDLIBS)
+$(OUTDIR)/yaml-cpp.a: $(OBJECTS)
+	@echo "  Creating library $@"
+	@$(AR) $(ARFLAGS) $(OUTDIR)/yaml-cpp.a $(OBJECTS)
 
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	@echo "  Compiling $<"
@@ -86,6 +73,22 @@ $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 
 after-build:
 	@echo "Build completed"
+
+# INSTALL
+
+before-install: build
+	@echo "Installing..."
+
+install-core: $(INSTALLDIR)/libyaml-cpp.a
+
+$(INSTALLDIR)/libyaml-cpp.a: $(OUTDIR)/yaml-cpp.a
+	@cp $< $@
+	@echo "  $@"
+
+after-install:
+	@echo "Installation completed"
+
+#CLEAN
 
 clean:
 	@-rm -rv -- $(CLEAN) || true
