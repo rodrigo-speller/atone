@@ -16,8 +16,11 @@
 #include "utils/time.h"
 
 namespace Atone {
+    SupervisorProgram::SupervisorProgram(AtoneOptions &options)
+        : ProgramBase(options) {
+    }
 
-    int SupervisorProgram::Run(AtoneOptions &options) {
+    int SupervisorProgram::Run() {
         auto atone_pid = getpid();
 
         Log::info("starting... (PID=%i)", atone_pid);

@@ -3,17 +3,12 @@
 
 #pragma once
 
-#include "ProgramBase.h"
-
 #include "config/AtoneOptions.h"
+#include "programs/ProgramBase.h"
 
 namespace Atone {
-    class VersionProgram: public ProgramBase {
-    private:
-        void PrintVersion();
-
+    class ProgramFactory {
     public:
-        VersionProgram(AtoneOptions &options);
-        int Run();
+        static ProgramBase* CreateProgram(AtoneOptions &options);
     };
 }

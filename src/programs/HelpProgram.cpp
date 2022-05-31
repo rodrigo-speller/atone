@@ -11,7 +11,11 @@
 #include "utils/constants.h"
 
 namespace Atone {
-    int HelpProgram::Run(AtoneOptions &options) {
+    HelpProgram::HelpProgram(AtoneOptions &options)
+        : ProgramBase(options) {
+    }
+
+    int HelpProgram::Run() {
         auto program = options.argv[0];
         program = basename(program);
         PrintUsage(program);

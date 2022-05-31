@@ -7,7 +7,10 @@
 
 namespace Atone {
     class ProgramBase {
+    protected:
+        ProgramBase(AtoneOptions &options);
+        AtoneOptions &options;
     public:
-        virtual int Run(AtoneOptions &options) = 0;
+        virtual int Run() = 0;
     };
 }

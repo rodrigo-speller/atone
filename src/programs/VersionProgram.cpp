@@ -9,7 +9,11 @@
 #include "utils/constants.h"
 
 namespace Atone {
-    int VersionProgram::Run(AtoneOptions &options) {
+    VersionProgram::VersionProgram(AtoneOptions &options)
+        : ProgramBase(options) {
+    }
+
+    int VersionProgram::Run() {
         PrintVersion();
         return 0;
     }

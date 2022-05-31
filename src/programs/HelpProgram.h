@@ -12,6 +12,7 @@ namespace Atone {
     private:
         void PrintUsage(char *program);
     public:
-        int Run(AtoneOptions &options);
+        HelpProgram(AtoneOptions &options);
+        int Run();
     };
 }

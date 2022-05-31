@@ -7,9 +7,7 @@
 #include "logging/Log.h"
 #include "logging/OutputLogger.h"
 #include "logging/TerminalLogger.h"
-#include "programs/HelpProgram.h"
-#include "programs/SupervisorProgram.h"
-#include "programs/VersionProgram.h"
+#include "programs/ProgramFactory.h"
 
 int main(int argc, char **argv) {
 
@@ -45,17 +43,7 @@ int main(int argc, char **argv) {
 
         // run
 
-        ProgramBase *program;
-
-        if (options.usage) {
-            program = new HelpProgram();
-        } else if (options.version) {
-            program = new VersionProgram();
-        } else {
-            program = new SupervisorProgram();
-        }
-
-        return program->Run(options);
+        return ProgramFactory::CreateProgram(options)->Run();
     }
     catch (char const *message) {
         Log::fatal(message);
