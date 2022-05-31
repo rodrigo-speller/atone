@@ -71,12 +71,12 @@ namespace Atone {
         }
     }
 
-    pid_t Supervisor::Spawn(const char *service_name, char *const argv[]) {
+    pid_t Supervisor::Spawn(char *const argv[]) {
         auto pid = vfork();
         
         if (pid < 0) { // error
             auto _errno = errno;
-            Log::crit("%s: service fork failed: %s", service_name, strerror(_errno));
+            Log::crit("service fork failed", strerror(_errno));
             throw std::system_error(_errno, std::system_category(), "fork failed");
         }
 
@@ -97,7 +97,7 @@ namespace Atone {
             execvp(argv[0], argv);
 
             // execution must not return, except on error
-            Log::crit("%s: service exec failed: %s", service_name, strerror(errno));
+            Log::crit("service exec failed", strerror(errno));
             exit(EXIT_FAILURE);
 
         }

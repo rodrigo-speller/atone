@@ -69,9 +69,11 @@ namespace Atone {
         pid_t pid;
         auto argv = this->argv();
         try {
-            pid = Supervisor::Spawn(service_name, argv);
+            Log::debug("%s: spawning service", service_name);
+            pid = Supervisor::Spawn(argv);
         }
         catch (...) {
+            Log::error("%s: failed to spawn service", service_name);
             state->status = ServiceStatus::Broken;
             throw;
         }
