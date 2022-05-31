@@ -81,7 +81,8 @@ namespace Atone {
                     mode = option.mode;
                 } else if (mode != option.mode) {
                     errorMessage = std::string("unexpected option -- '")
-                        .append(option.parser.longname, "'");
+                        + option.parser.longname
+                        + "'";
                     return;
                 }
             }

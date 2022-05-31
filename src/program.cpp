@@ -23,8 +23,7 @@ int main(int argc, char **argv) {
         options.LoadArgs(argc, argv);
 
         if (!options.errorMessage.empty()) { // options error
-            std::cerr << "load options failed: " << options.errorMessage << std::endl;
-            return 1;
+            throw std::domain_error("load options failed: " + options.errorMessage);
         }
 
         // setup
