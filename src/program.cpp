@@ -5,8 +5,6 @@
 
 #include "config/AtoneOptions.h"
 #include "logging/Log.h"
-#include "logging/OutputLogger.h"
-#include "logging/TerminalLogger.h"
 #include "programs/ProgramFactory.h"
 
 int main(int argc, char **argv) {
@@ -26,20 +24,7 @@ int main(int argc, char **argv) {
 
         // setup
 
-        Logger *logger;
-
-        if (options.loggerFactory) {
-            logger = options.loggerFactory(options);
-        } else {
-            // default logger
-            if (isatty(1)) {
-                logger = new TerminalLogger(options.logLevel);
-            } else {
-                logger = new OutputLogger(options.logLevel);
-            }
-        }
-
-        Log::set(logger);
+        Log::set(options.loggerFactory(options));
 
         // run
 

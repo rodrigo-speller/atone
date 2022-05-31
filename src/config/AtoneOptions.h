@@ -28,7 +28,7 @@ namespace Atone {
             char **argv = NULL;
             size_t commandArgc = 0;
             char **commandArgv = NULL;
-            LoggerFactory loggerFactory = 0;
+            LoggerFactory loggerFactory = DefaultLoggerFactory;
             LogLevel logLevel = LogLevel::Trace;
 
             void LoadArgs(size_t argc, char **argv);
@@ -41,6 +41,8 @@ namespace Atone {
 
             LogLevel ParseLogLevel(const char *level);
             LoggerFactory ParseLogger(const char *logger);
+
+            static Logger *DefaultLoggerFactory(AtoneOptions options);
     };
 
 }

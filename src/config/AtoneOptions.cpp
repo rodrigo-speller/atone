@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <unistd.h>
 
 #include "AtoneMode.h"
 #include "logging/Logger.h"
@@ -228,4 +229,11 @@ namespace Atone {
         throw std::domain_error("invalid logger");
     }
 
+    Logger *AtoneOptions::DefaultLoggerFactory(AtoneOptions options) {
+        if (isatty(1)) {
+            return new TerminalLogger(options.logLevel);
+        }
+
+        return new OutputLogger(options.logLevel);
+    }
 }
