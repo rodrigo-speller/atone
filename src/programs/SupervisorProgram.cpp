@@ -16,10 +16,6 @@
 #include "utils/time.h"
 
 namespace Atone {
-    bool reap_processes(ServicesManager &services, bool restart = false);
-
-    void kill_all_process(ServicesManager &services, timespec timeout);
-    bool stop_all_services(ServicesManager &services, timespec timeout);
 
     int SupervisorProgram::Run(AtoneOptions &options) {
         auto atone_pid = getpid();
@@ -56,7 +52,7 @@ namespace Atone {
                 case SIGCHLD: {
                     Log::debug("signal received: %s (PID=%i)", strsignal(signum), siginfo.si_pid);
 
-                    if (reap_processes(services, true)) {
+                    if (ReapProcesses(services, true)) {
                         terminate = true;
                     }
                     
@@ -76,8 +72,8 @@ namespace Atone {
         // stop all services before to kill all process
         // to allow the services gracefully terminates
         // their children processes 
-        stop_all_services(services, timeout);
-        kill_all_process(services, timeout);
+        StopAllServices(services, timeout);
+        KillAllProcess(services, timeout);
         
         Supervisor::ReapZombieProcess();
 
@@ -86,7 +82,7 @@ namespace Atone {
     }
 
     
-    bool reap_processes(ServicesManager &services, bool restart_services) {
+    bool SupervisorProgram::ReapProcesses(ServicesManager &services, bool restart_services) {
         siginfo_t siginfo;
 
         while (true) {
@@ -124,7 +120,7 @@ namespace Atone {
         }
     }
 
-    void kill_all_process(ServicesManager &services, timespec timeout) {
+    void SupervisorProgram::KillAllProcess(ServicesManager &services, timespec timeout) {
         Log::trace("terminating child process");
 
         // sends TERM signal to all process
@@ -163,7 +159,7 @@ namespace Atone {
                         throw std::system_error(err, std::system_category(), "killing child process failed");
                     }
 
-                    if (reap_processes(services, false))
+                    if (ReapProcesses(services, false))
                         return;
 
                     timeout = { 0, 1000000 /* 1ms */ };
@@ -175,7 +171,7 @@ namespace Atone {
                 case SIGCHLD: {
                     Log::debug("signal received: %s (PID=%i)", strsignal(signum), siginfo.si_pid);
 
-                    if (reap_processes(services, false))
+                    if (ReapProcesses(services, false))
                         return;
 
                     break;
@@ -191,7 +187,7 @@ namespace Atone {
 
     }
 
-    bool stop_all_services(ServicesManager &services, timespec timeout) {
+    bool SupervisorProgram::StopAllServices(ServicesManager &services, timespec timeout) {
         Log::trace("stopping all services");
 
         if (services.Stop())
@@ -210,7 +206,7 @@ namespace Atone {
 
                 case SIGCHLD: {
                     Log::debug("signal received: %s (PID=%i)", strsignal(signum), siginfo.si_pid);
-                    reap_processes(services, false);
+                    ReapProcesses(services, false);
                     break;
                 }
                 default:

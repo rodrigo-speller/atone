@@ -6,9 +6,14 @@
 #include "ProgramBase.h"
 
 #include "config/AtoneOptions.h"
+#include "config/ServicesManager.h"
 
 namespace Atone {
     class SupervisorProgram: public ProgramBase {
+    private:
+        bool ReapProcesses(ServicesManager &services, bool restart = false);
+        void KillAllProcess(ServicesManager &services, timespec timeout);
+        bool StopAllServices(ServicesManager &services, timespec timeout);
     public:
         int Run(AtoneOptions &options);
     };
