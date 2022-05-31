@@ -42,10 +42,10 @@ namespace Atone {
         }
 
         int option_index;
-        while (optparse_long(&state, options_long, &option_index) != -1) {
+        int option_char;
+        while ((option_char = optparse_long(&state, options_long, &option_index)) != -1) {
             auto option = options[option_index];
-
-            switch (option.parser.shortname) {
+            switch (option_char) {
                 case 'c':
                     if (state.optarg) {
                         configFile = state.optarg;
@@ -68,31 +68,35 @@ namespace Atone {
                     break;
                 case '?':
                     errorMessage = state.errmsg;
-                    break;
+                    if (errorMessage.empty()) {
+                        errorMessage = "unknown error";
+                    }
+                    return;
             }
 
             if (option.mode != AtoneMode::Undefined) { // sets mode
-                if (mode == AtoneMode::Undefined)
+                if (mode == AtoneMode::Undefined) {
                     mode = option.mode;
-                else if (mode != option.mode)
-                    errorMessage = "invalid arguments";
+                } else if (mode != option.mode) {
+                    errorMessage = std::string("unexpected option -- '")
+                        .append(option.parser.longname, "'");
+                    return;
+                }
             }
         }
 
-        if (errorMessage.empty()) { // no error post execution
-            // check for remaining args
-            if (argv[state.optind]) {
-                if (mode == AtoneMode::Undefined) {
-                    mode = AtoneMode::SingleService;
-                }
-                
-                if (mode == AtoneMode::SingleService) {
-                    this->argc = argc - state.optind;
-                    this->argv = &argv[state.optind];
-                }
-                else {
-                    errorMessage = "invalid arguments";
-                }
+        // check for remaining args
+        if (argv[state.optind]) {
+            if (mode == AtoneMode::Undefined) {
+                mode = AtoneMode::SingleService;
+            }
+            
+            if (mode == AtoneMode::SingleService) {
+                this->argc = argc - state.optind;
+                this->argv = &argv[state.optind];
+            }
+            else {
+                errorMessage = "invalid arguments";
             }
         }
     }
