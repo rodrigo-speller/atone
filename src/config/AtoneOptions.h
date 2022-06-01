@@ -4,6 +4,7 @@
 #pragma once
 
 #include "optparse.h"
+#include <memory>
 #include <string>
 
 #include "AtoneMode.h"
@@ -15,7 +16,7 @@ namespace Atone {
 
     class AtoneOptions {
         public:
-            typedef Logger *(*LoggerFactory)(AtoneOptions options);
+            typedef std::shared_ptr<Logger> (*LoggerFactory)(AtoneOptions options);
 
             AtoneMode mode = AtoneMode::Undefined;
             bool usage = false;
@@ -42,7 +43,7 @@ namespace Atone {
             LogLevel ParseLogLevel(const char *level);
             LoggerFactory ParseLogger(const char *logger);
 
-            static Logger *DefaultLoggerFactory(AtoneOptions options);
+            static std::shared_ptr<Logger> DefaultLoggerFactory(AtoneOptions options);
     };
 
 }

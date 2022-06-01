@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstdarg>
+#include <memory>
 
 #include "NullLogger.h"
 #include "LogLevel.h"
@@ -14,10 +15,10 @@ namespace Atone {
     class Log {
 
         private:
-            static Logger *logger;
+            static std::shared_ptr<Logger> logger;
 
         public:
-            static void set(Logger *logger);
+            static void set(std::shared_ptr<Logger> logger);
 
 
             template <typename... Args>

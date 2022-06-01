@@ -4,6 +4,7 @@
 #include "Log.h"
 
 #include <cstdarg>
+#include <memory>
 #include <syslog.h>
 
 #include "NullLogger.h"
@@ -12,10 +13,14 @@
 
 namespace Atone {
 
-    Logger *Log::logger = NullLogger::instance();
+    std::shared_ptr<Logger> Log::logger = std::make_shared<NullLogger>();
 
-    void Log::set(Logger *logger) {
-        Log::logger = logger;
+    void Log::set(std::shared_ptr<Logger> logger) {
+        if (logger == nullptr) {
+            Log::logger = std::make_shared<NullLogger>();
+        } else {
+            Log::logger = logger;
+        }
     }
 
 }

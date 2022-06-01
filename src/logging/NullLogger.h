@@ -3,17 +3,15 @@
 
 #pragma once
 
+#include <memory>
+
 #include "LogLevel.h"
 #include "Logger.h"
 
 namespace Atone {
 
     class NullLogger : public Logger {
-        private:
-            static NullLogger _instance;
-
         public:
-            static Logger *instance();
             void Log(LogLevel level, const char *format, ...);
     };
 
