@@ -1,5 +1,7 @@
 # yaml-cpp
 
+> This directory is a tini build of yaml-cpp.
+
 yaml-cpp is a [YAML](http://www.yaml.org/) parser and emitter in C++ matching the [YAML 1.2 spec](http://www.yaml.org/spec/1.2/spec.html).
 
 To get a feel for how it can be used, see the [Tutorial](https://github.com/jbeder/yaml-cpp/wiki/Tutorial) or [How to Emit YAML](https://github.com/jbeder/yaml-cpp/wiki/How-To-Emit-YAML). For the old API (version < 0.5.0), see [How To Parse A Document](https://github.com/jbeder/yaml-cpp/wiki/How-To-Parse-A-Document-(Old-API)).
@@ -10,7 +12,6 @@ If you find a bug, post an [issue](https://github.com/jbeder/yaml-cpp/issues)! I
 
 # How to Build #
 
-> This directory is a tini build of yaml-cpp.
 1. Download and install [GNU Make](http://www.cmake.org) (Downloading Make).
 
 2. Navigate into this directory.
