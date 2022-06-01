@@ -2,6 +2,7 @@
     "files.associations": {
         ".clang-format": "yaml"
     },
+    "C_Cpp.autoAddFileAssociations": false,
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
         "*.h": "${capture}.cpp",
