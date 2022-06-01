@@ -56,6 +56,5 @@ int main(int argc, char **argv) {
         std::cerr << "Caught unknown exception: " << name << std::endl;
     }
 
-    exit(3);
+    return 3;
 }
-
