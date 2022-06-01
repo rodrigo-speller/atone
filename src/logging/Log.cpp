@@ -15,11 +15,15 @@ namespace Atone {
 
     std::shared_ptr<Logger> Log::logger = std::make_shared<NullLogger>();
 
-    void Log::set(std::shared_ptr<Logger> logger) {
+    void Log::set(const std::shared_ptr<Logger> &logger) {
         if (logger == nullptr) {
-            Log::logger = std::make_shared<NullLogger>();
+            auto nullLogger = std::make_shared<NullLogger>();
+            Log::trace("logging stoped");
+            Log::logger = nullLogger;
         } else {
+            Log::trace("logging stoped");
             Log::logger = logger;
+            Log::trace("logging started");
         }
     }
 

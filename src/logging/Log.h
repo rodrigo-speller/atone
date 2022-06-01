@@ -18,7 +18,7 @@ namespace Atone {
             static std::shared_ptr<Logger> logger;
 
         public:
-            static void set(std::shared_ptr<Logger> logger);
+            static void set(const std::shared_ptr<Logger> &logger);
 
             template <typename... Args>
             inline static void emergency(const char *format, Args... args) {
