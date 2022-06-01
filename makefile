@@ -59,7 +59,11 @@ BUILDDIR?=build
 TARGETDIR?=$(BUILDDIR)/$(TARGET)
 OUTDIR?=$(TARGETDIR)/bin
 OBJDIR?=$(TARGETDIR)/obj
-CLEAN+=$(TARGETDIR)
+
+#cleanup
+
+CLEAN+=$(OUTDIR)
+CLEAN+=$(OBJDIR)
 
 # artifacts
 
@@ -67,7 +71,6 @@ SOURCES=$(shell find "$(SRCDIR)" -name *.cpp)
 OBJECTS=$(SOURCES:%.cpp=$(OBJDIR)/%.o)
 
 # internal targets
-
 before-build:
 	@echo "Building..."
 	@echo "  Target: $(TARGET)"
@@ -93,4 +96,9 @@ clean:
 clean-all:
 	@-rm -rv -- $(BUILDDIR) || true
 
+$(TARGETDIR)/.marker: makefile
+	@touch $@
+	$(MAKE) clean
+
 -include $(OBJECTS:.o=.d)
+-include $(TARGETDIR)/.marker

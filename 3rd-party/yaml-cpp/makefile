@@ -44,7 +44,11 @@ BUILDDIR?=build
 TARGETDIR?=$(BUILDDIR)/$(TARGET)
 OUTDIR?=$(TARGETDIR)/bin
 OBJDIR?=$(TARGETDIR)/obj
-CLEAN+=$(TARGETDIR)
+
+# cleanup
+
+CLEAN+=$(OUTDIR)
+CLEAN+=$(OBJDIR)
 
 # artifacts
 
@@ -96,4 +100,9 @@ clean:
 clean-all:
 	@-rm -rv -- $(BUILDDIR) || true
 
+$(TARGETDIR)/.marker: makefile
+	@touch $@
+	$(MAKE) clean
+
 -include $(OBJECTS:.o=.d)
+-include $(TARGETDIR)/.marker
