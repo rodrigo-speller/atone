@@ -79,15 +79,21 @@ namespace Atone {
                 throw AtoneException("invalid service configuration");
         }
 
-        SetCommandArgs(*svcConfig, config["command"]);
-        SetDependsOn(*svcConfig, config["depends_on"]);
-        SetRestartMode(*svcConfig, config["restart"]);
+        auto command = config["command"];
+        if (command) SetCommandArgs(*svcConfig, command);
+
+        auto depends_on = config["depends_on"];
+        if (depends_on) SetDependsOn(*svcConfig, depends_on);
+
+        auto restart = config["restart"];
+        if (restart) SetRestartMode(*svcConfig, restart);
 
         return Service(svcConfig);
     }
 
     void YamlConfigParser::SetCommandArgs(ServiceConfig &target, const YAML::Node &command) {
         switch (command.Type()) {
+            case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
                 throw AtoneException("service must have a command");
 
@@ -104,6 +110,7 @@ namespace Atone {
         switch (depends_on.Type()) {
             case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
+                target.depends_on = std::vector<std::string>();
                 return;
 
             case YAML::NodeType::Scalar:
@@ -135,6 +142,7 @@ namespace Atone {
         switch (restart.Type()) {
             case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
+                target.restart = ServiceRestartMode::No;
                 return;
 
             case YAML::NodeType::Scalar:
