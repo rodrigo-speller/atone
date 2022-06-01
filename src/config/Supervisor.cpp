@@ -11,7 +11,7 @@
 #include "utils/time.h"
 
 namespace Atone {
-    Supervisor *Supervisor::instance = new Supervisor();
+    Supervisor *Supervisor::instance = nullptr;
 
     Supervisor::Supervisor() {
 
@@ -34,11 +34,50 @@ namespace Atone {
 
     }
 
+    Supervisor::~Supervisor() {
+        // restores the signals blocked by Atone
+        if (sigprocmask(SIG_SETMASK, &spawnSigset, nullptr)) {
+            Log::crit("sigprocmask failed: %s", strerror(errno));
+            exit(EXIT_FAILURE);
+        };
+    }
+
+    void Supervisor::Initialize() {
+        if (instance == nullptr) {
+            Log::debug("supervisor: initializing...");
+            instance = new Supervisor();
+            Log::debug("supervisor: ready");
+        }
+        else {
+            Log::warn("supervisor: already initialized");
+        }
+    }
+
+    void Supervisor::Dispose() {
+        if (instance != nullptr) {
+            Log::debug("supervisor: disposing...");
+            delete instance;
+            instance = nullptr;
+            Log::debug("supervisor: disposed");
+        }
+        else {
+            Log::warn("supervisor: already disposed");
+        }
+    }
+
+    void Supervisor::RequireInstance() {
+        if (instance == nullptr) {
+            throw std::domain_error("supervisor is not initialized");
+        }
+    }
+
     void Supervisor::UnexpectedSignalHandler(int signum) {
         Log::crit("unexpected signal received: %s", strsignal(signum));
     }
 
     void Supervisor::ReapZombieProcess(pid_t pid) {
+        RequireInstance();
+
         Log::trace("reaping zombie process(es) (PID=%i)", pid);
 
         while (true) {
@@ -74,6 +113,8 @@ namespace Atone {
     }
 
     pid_t Supervisor::Spawn(char *const argv[]) {
+        RequireInstance();
+
         auto pid = vfork();
         
         if (pid < 0) { // error
@@ -84,16 +125,16 @@ namespace Atone {
 
         if (pid == 0) { // child process
 
+            // release resources
+
             // NOTE: A child process created via fork(2) inherits the process signal mask from the parent.
             // Before execve(2) we must restores sigprocmask.
-            if (sigprocmask(SIG_SETMASK, &instance->spawnSigset, NULL)) {
-                Log::crit("sigprocmask failed: %s", strerror(errno));
-                exit(EXIT_FAILURE);
-            }
 
             // NOTE: A child created via fork(2) inherits a copy of its parent's signal dispositions.
             // During an execve(2), the dispositions of handled signals are reset to the default;
             // the dispositions of ignored signals are left unchanged.
+
+            instance->Dispose();
 
             // execute
             execvp(argv[0], argv);
@@ -108,6 +149,8 @@ namespace Atone {
     }
 
     int Supervisor::WaitSignal(siginfo_t *info) {
+        RequireInstance();
+
         int signum;
 
         if ((signum = sigwaitinfo(&instance->atoneSigset, info)) == -1) {
@@ -119,6 +162,8 @@ namespace Atone {
     }
 
     int Supervisor::WaitSignal(siginfo_t *info, timespec &timeout) {
+        RequireInstance();
+
         int signum;
 
         timespec now;

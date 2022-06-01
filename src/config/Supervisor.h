@@ -20,9 +20,14 @@ namespace Atone {
             sigset_t spawnSigset = sigset_t();
 
             Supervisor();
+            ~Supervisor();
+            static void RequireInstance();
+
             static void UnexpectedSignalHandler(int signum);
 
         public:
+            static void Initialize();
+            static void Dispose();
 
             static void ReapZombieProcess(pid_t pid = -1);
             static pid_t Spawn(char *const argv[]);

@@ -7,12 +7,15 @@
 #include <unistd.h>
 
 #include "config/AtoneOptions.h"
+#include "config/Supervisor.h"
 #include "logging/Log.h"
 #include "programs/ProgramFactory.h"
 
 int main(int argc, char **argv) {
 
     using namespace Atone;
+
+    int exitCode = EXIT_FAILURE;
 
     // GLOBAL EXCEPTION HANDLING
     try {
@@ -28,10 +31,13 @@ int main(int argc, char **argv) {
         // setup
 
         Log::set(options.loggerFactory(options));
+        Supervisor::Initialize();
 
-        // run
+        exitCode = ProgramFactory::CreateProgram(options)->Run();
 
-        return ProgramFactory::CreateProgram(options)->Run();
+        // shutdown
+        Supervisor::Dispose();
+        Log::set(nullptr);
     }
     catch (char const *message) {
         Log::fatal(message);
@@ -56,5 +62,5 @@ int main(int argc, char **argv) {
         std::cerr << "Caught unknown exception: " << name << std::endl;
     }
 
-    return 3;
+    return exitCode;
 }
