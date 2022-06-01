@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <libgen.h>
+#include <memory>
 #include <string>
 
 #include "config/AtoneOptions.h"
@@ -23,7 +24,7 @@ namespace Atone {
     Context Context::FromOptions(AtoneOptions options) {
         switch (options.mode) {
             case AtoneMode::SingleService: {
-                auto service_cfg = new ServiceConfig(options.serviceName);
+                auto service_cfg = std::make_shared<ServiceConfig>(options.serviceName);
                 service_cfg->SetCommandArgs(options.commandArgc, options.commandArgv);
                 auto service = Service(service_cfg);
                 auto services = ServicesManager(service);

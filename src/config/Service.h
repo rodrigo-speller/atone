@@ -24,7 +24,7 @@ namespace Atone {
 
         public:
             Service();
-            Service(ServiceConfig *config);
+            Service(std::shared_ptr<ServiceConfig> config);
 
             std::string name();
             size_t argc();

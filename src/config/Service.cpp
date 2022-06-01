@@ -20,8 +20,8 @@ namespace Atone {
 
     Service::Service() {}
 
-    Service::Service(ServiceConfig *config) {
-        this->config = std::shared_ptr<ServiceConfig>(config);
+    Service::Service(std::shared_ptr<ServiceConfig> config)
+        : config(config) {
         this->state = std::shared_ptr<ServiceState>(new ServiceState());
     }
 

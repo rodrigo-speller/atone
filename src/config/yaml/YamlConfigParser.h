@@ -14,13 +14,13 @@
 namespace Atone {
     class YamlConfigParser {
     public:
-        Context ParseDocument(std::string path);
-        Context ParseDocument(YAML::Node document, std::string basepath);
-        ServicesManager ParseServices(YAML::Node document);
-        Service ParseService(std::string name, YAML::Node node);
+        Context ParseDocument(const std::string &path);
+        Context ParseDocument(const YAML::Node &document, const std::string &basepath);
+        ServicesManager ParseServices(const YAML::Node &document);
+        Service ParseService(const std::string &name, const YAML::Node &node);
 
-        void SetCommandArgs(ServiceConfig *target, YAML::Node command);
-        void SetDependsOn(ServiceConfig *target, YAML::Node depends_on);
-        void SetRestartMode(ServiceConfig *target, YAML::Node restart);
+        void SetCommandArgs(ServiceConfig &target, const YAML::Node &command);
+        void SetDependsOn(ServiceConfig &target, const YAML::Node &depends_on);
+        void SetRestartMode(ServiceConfig &target, const YAML::Node &restart);
     };
 }

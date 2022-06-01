@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "yaml-cpp/yaml.h"
@@ -16,7 +17,7 @@
 #include "exception/AtoneException.h"
 
 namespace Atone {
-    Context YamlConfigParser::ParseDocument(std::string configFile) {
+    Context YamlConfigParser::ParseDocument(const std::string &configFile) {
         auto config_file_path = std::filesystem::path(configFile);
         auto config_path = config_file_path.parent_path();
 
@@ -24,7 +25,7 @@ namespace Atone {
         return ParseDocument(config, config_path);
     }
     
-    Context YamlConfigParser::ParseDocument(YAML::Node document, std::string basepath) {
+    Context YamlConfigParser::ParseDocument(const YAML::Node &document, const std::string &basepath) {
         auto settings_node = document["settings"];
         std::string workdir;
 
@@ -32,7 +33,7 @@ namespace Atone {
             auto workdir_node = settings_node["workdir"];
 
             if (workdir_node.Type() == YAML::NodeType::Scalar) {
-                workdir = basepath.append(workdir_node.as<std::string>());
+                workdir = basepath + workdir_node.as<std::string>();
             }
         }
 
@@ -40,7 +41,7 @@ namespace Atone {
         return Context(services, workdir);
     }
     
-    ServicesManager YamlConfigParser::ParseServices(YAML::Node document) {
+    ServicesManager YamlConfigParser::ParseServices(const YAML::Node &document) {
         const auto services_node = document["services"];
 
         if (!services_node) {
@@ -63,13 +64,13 @@ namespace Atone {
         return ServicesManager(services);
     }
 
-    Service YamlConfigParser::ParseService(std::string name, YAML::Node config) {
-        auto svcConfig = new ServiceConfig(name);
+    Service YamlConfigParser::ParseService(const std::string &name, const YAML::Node &config) {
+        auto svcConfig = std::make_shared<ServiceConfig>(name);
 
         switch (config.Type()) {
             case YAML::NodeType::Scalar:
                 svcConfig->SetCommandArgs(config.as<std::string>());
-                return svcConfig;
+                return Service(svcConfig);
 
             case YAML::NodeType::Map:
                 break;
@@ -78,20 +79,20 @@ namespace Atone {
                 throw AtoneException("invalid service configuration");
         }
 
-        SetCommandArgs(svcConfig, config["command"]);
-        SetDependsOn(svcConfig, config["depends_on"]);
-        SetRestartMode(svcConfig, config["restart"]);
+        SetCommandArgs(*svcConfig, config["command"]);
+        SetDependsOn(*svcConfig, config["depends_on"]);
+        SetRestartMode(*svcConfig, config["restart"]);
 
         return Service(svcConfig);
     }
 
-    void YamlConfigParser::SetCommandArgs(ServiceConfig* target, YAML::Node command) {
+    void YamlConfigParser::SetCommandArgs(ServiceConfig &target, const YAML::Node &command) {
         switch (command.Type()) {
             case YAML::NodeType::Undefined:
                 throw AtoneException("service must have a command");
 
             case YAML::NodeType::Scalar:
-                target->SetCommandArgs(command.as<std::string>());
+                target.SetCommandArgs(command.as<std::string>());
                 return;
 
             default:
@@ -99,14 +100,14 @@ namespace Atone {
         }
     }
 
-    void YamlConfigParser::SetDependsOn(ServiceConfig* target, YAML::Node depends_on) {
+    void YamlConfigParser::SetDependsOn(ServiceConfig &target, const YAML::Node &depends_on) {
         switch (depends_on.Type()) {
             case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
                 return;
 
             case YAML::NodeType::Scalar:
-                target->depends_on = std::vector<std::string>{depends_on.as<std::string>()};
+                target.depends_on = std::vector<std::string>{depends_on.as<std::string>()};
                 return;
 
             case YAML::NodeType::Sequence:
@@ -127,10 +128,10 @@ namespace Atone {
             value[i] = node.as<std::string>();
         }
 
-        target->depends_on = value;
+        target.depends_on = value;
     }
 
-    void YamlConfigParser::SetRestartMode(ServiceConfig* target, YAML::Node restart) {
+    void YamlConfigParser::SetRestartMode(ServiceConfig &target, const YAML::Node &restart) {
         switch (restart.Type()) {
             case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
@@ -157,6 +158,6 @@ namespace Atone {
         else
             throw AtoneException("invalid restart");
 
-        target->restart = value;
+        target.restart = value;
     }
 }
