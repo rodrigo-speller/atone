@@ -86,33 +86,35 @@ namespace Atone {
         return 0;
     }
 
-    
+    /**
+     * Request to reap all zombie processes.
+     * 
+     * @param services The services to collect services.
+     * @param restart_services If true, restart all services that can be restarted.
+     * @return After all zombie processes is reaped, returns true if ll child processes is terminated.
+     *         And false, if any child process is still running.
+     */
     bool SupervisorProgram::ReapProcesses(ServicesManager &services, bool restart_services) {
-        siginfo_t siginfo;
+        Log::debug("reaping child processes");
 
         while (true) {
-            // WNOHANG: zero out the si_pid field before the call and check for a nonzero value in this field after the call
-            siginfo.si_pid = 0;
-            if (waitid(P_ALL, 0, &siginfo, WNOWAIT | WNOHANG | WEXITED) != 0) {
-                auto _errno = errno;
+            auto pid = Supervisor::CheckForExitedProcess();
 
-                if (_errno == ECHILD) {
-                    Log::notice("no child process is running");
+            switch (pid) {
+                case -1:
+                    Log::debug("no more child process");
                     return true;
-                }
-
-                throw std::system_error(_errno, std::system_category(), "wait failed");
+                case 0:
+                    // no process exits, but one or more child processes still running
+                    Log::debug("reaping child processes completed");
+                    return false;
             }
-
-            auto pid = siginfo.si_pid;
-            // WNOHANG: zero out the si_pid field before the call and check for a nonzero value in this field after the call
-            if (pid == 0)
-                return false;
 
             Log::debug("child process exits (PID=%i)", pid);
 
             Service *service;
             if (services.TryGetService(pid, service)) {
+                // service process
                 if (service->CheckProcessState())
                     throw AtoneException("invalid service process state");
 
@@ -120,6 +122,7 @@ namespace Atone {
                     services.CheckService(*service);
             }
             else {
+                // any other process
                 Supervisor::ReapZombieProcess(pid);
             }
         }

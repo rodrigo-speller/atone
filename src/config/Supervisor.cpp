@@ -146,6 +146,33 @@ namespace Atone {
         return pid;
     }
 
+    /**
+     * Check if any child process has exited.
+     * @return Returns the pid of the child process that has exited,
+     *         or 0 if no child process has exited (but one or more child processes still running),
+     *         or -1 if no child process is running.
+     */
+    pid_t Supervisor::CheckForExitedProcess() {
+        siginfo_t siginfo;
+
+        // WNOHANG: zero out the si_pid field before the call and check for a nonzero value in this field after the call
+        siginfo.si_pid = 0;
+        if (waitid(P_ALL, 0, &siginfo, WNOWAIT | WNOHANG | WEXITED) != 0) {
+            auto _errno = errno;
+
+            if (_errno == ECHILD) {
+                Log::notice("no child process is running");
+                return -1;
+            }
+
+            throw std::system_error(_errno, std::system_category(), "wait failed");
+        }
+
+        auto pid = siginfo.si_pid;
+        assert(pid >= 0);
+        return pid;
+    }
+
     int Supervisor::WaitSignal(siginfo_t *info) {
         RequireInstance();
 
