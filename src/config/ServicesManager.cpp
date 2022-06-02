@@ -13,15 +13,7 @@ namespace Atone {
 
     ServicesManager::ServicesManager() {}
 
-    ServicesManager::ServicesManager(Service service) {
-        this->services.insert(std::pair(service.name(), service));
-    }
-
-    ServicesManager::ServicesManager(std::map<std::string, Service> services) {
-        this->services = services;
-    }
-
-    bool ServicesManager::isRunning() {
+    bool ServicesManager::isRunning() const {
         for (auto entry : services) {
             auto service = entry.second;
 
@@ -32,13 +24,18 @@ namespace Atone {
         return false;
     }
 
-    bool ServicesManager::TryGetService(pid_t pid, Service *result) {
+    void ServicesManager::Add(const ServiceConfig &config) {
+        auto service = new Service(config);
+        services.insert({ service->name(), *service });
+    }
+
+    bool ServicesManager::TryGetService(const pid_t pid, Service *&result) const {
         for (auto entry : services) {
             auto service = entry.second;
 
             if (service.pid() == pid) {
                 if (result)
-                    *result = service;
+                    result = &service;
                 return true;
             }
         }
@@ -46,15 +43,14 @@ namespace Atone {
         return false;
     }
 
-    bool ServicesManager::TryGetService(const std::string name, Service *result) {
+    bool ServicesManager::TryGetService(const std::string &name, Service *&result) const {
         auto entry = services.find(name);
 
         if (entry != services.end()) {
             if (result)
-                *result = entry->second;
+                result = &entry->second;
             return true;
         }
-
         return false;
     }
 
@@ -86,7 +82,7 @@ namespace Atone {
         return success;
     }
 
-    bool ServicesManager::CheckAllServices() {
+    bool ServicesManager::CheckAllServices() const {
         auto result = false;
 
         Log::trace("checking all services");
@@ -100,7 +96,7 @@ namespace Atone {
         return result;
     }
 
-    bool ServicesManager::CheckService(pid_t pid) {
+    bool ServicesManager::CheckService(const pid_t pid) const {
         for (auto entry : services) {
             auto service = entry.second;
 
@@ -113,7 +109,7 @@ namespace Atone {
         return false;
     }
 
-    bool ServicesManager::CheckService(Service service) {
+    bool ServicesManager::CheckService(Service &service) const {
         auto service_name = service.name().c_str();
 
         Log::trace("%s: checking service", service_name);

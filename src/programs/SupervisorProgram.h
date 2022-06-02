@@ -15,7 +15,7 @@ namespace Atone {
         void KillAllProcess(ServicesManager &services, timespec timeout);
         bool StopAllServices(ServicesManager &services, timespec timeout);
     public:
-        SupervisorProgram(AtoneOptions &options);
+        SupervisorProgram(const AtoneOptions &options);
         int Run();
     };
 }

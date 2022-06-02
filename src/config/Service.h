@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
 
 #include "ServiceConfig.h"
@@ -19,24 +18,23 @@ namespace Atone {
                 int exit_code;
             };
 
-            std::shared_ptr<ServiceState> state;
-            std::shared_ptr<ServiceConfig> config;
+            ServiceConfig config;
+            ServiceState state;
 
         public:
-            Service();
-            Service(std::shared_ptr<ServiceConfig> config);
+            Service(const ServiceConfig &config);
 
-            std::string name();
-            size_t argc();
-            char **argv();
-            std::vector<std::string> dependsOn();
-            ServiceRestartMode restartMode();
+            std::string name() const;
+            size_t argc() const;
+            char **argv() const;
+            std::vector<std::string> dependsOn() const;
+            ServiceRestartMode restartMode() const;
 
-            ServiceStatus status();
-            bool isRunning();
-            pid_t pid();
-            int exitCode();
-            bool canRestart();
+            ServiceStatus status() const;
+            bool isRunning() const;
+            pid_t pid() const;
+            int exitCode() const;
+            bool canRestart() const;
 
             void Start();
 

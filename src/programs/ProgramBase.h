@@ -8,8 +8,8 @@
 namespace Atone {
     class ProgramBase {
     protected:
-        ProgramBase(AtoneOptions &options);
-        AtoneOptions &options;
+        ProgramBase(const AtoneOptions &options);
+        const AtoneOptions &options;
     public:
         virtual int Run() = 0;
     };

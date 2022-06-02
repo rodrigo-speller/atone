@@ -12,7 +12,7 @@ namespace Atone {
 
     class ServiceConfig {
         public:
-            ServiceConfig(std::string name);
+            ServiceConfig(const std::string &name);
             ~ServiceConfig();
 
             std::string name;
@@ -21,8 +21,10 @@ namespace Atone {
             std::vector<std::string> depends_on;
             ServiceRestartMode restart = ServiceRestartMode::No;
 
-            void SetCommandArgs(std::string command);
-            void SetCommandArgs(size_t argc, char **argv);
+            void SetCommandArgs(const std::string &command);
+            void SetCommandArgs(const size_t argc, char **argv);
+
+        private:
             void FreeCommandArgs();
     };
 

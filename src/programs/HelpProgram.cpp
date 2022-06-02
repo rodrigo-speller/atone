@@ -11,7 +11,7 @@
 #include "utils/constants.h"
 
 namespace Atone {
-    HelpProgram::HelpProgram(AtoneOptions &options)
+    HelpProgram::HelpProgram(const AtoneOptions &options)
         : ProgramBase(options) {
     }
 

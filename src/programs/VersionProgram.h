@@ -13,7 +13,7 @@ namespace Atone {
         void PrintVersion();
 
     public:
-        VersionProgram(AtoneOptions &options);
+        VersionProgram(const AtoneOptions &options);
         int Run();
     };
 }

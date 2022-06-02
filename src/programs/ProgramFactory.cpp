@@ -3,6 +3,8 @@
 
 #include "ProgramFactory.h"
 
+#include <memory>
+
 #include "config/AtoneOptions.h"
 #include "programs/HelpProgram.h"
 #include "programs/ProgramBase.h"
@@ -10,7 +12,7 @@
 #include "programs/VersionProgram.h"
 
 namespace Atone {
-    ProgramBase* ProgramFactory::CreateProgram(AtoneOptions &options) {
+    std::shared_ptr<ProgramBase> ProgramFactory::CreateProgram(const AtoneOptions &options) {
         ProgramBase *program;
 
         if (options.usage) {
@@ -21,6 +23,6 @@ namespace Atone {
             program = new SupervisorProgram(options);
         }
 
-        return program;
+        return std::shared_ptr<ProgramBase>(program);
     }
 }

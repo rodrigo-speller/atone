@@ -4,7 +4,6 @@
 #include "Service.h"
 
 #include <assert.h>
-#include <memory>
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -18,25 +17,22 @@
 
 namespace Atone {
 
-    Service::Service() {}
-
-    Service::Service(std::shared_ptr<ServiceConfig> config)
+    Service::Service(const ServiceConfig &config)
         : config(config) {
-        this->state = std::shared_ptr<ServiceState>(new ServiceState());
     }
 
-    std::string Service::name() { return config->name; }
-    size_t Service::argc() { return config->argc; }
-    char **Service::argv() { return config->argv; }
-    std::vector<std::string> Service::dependsOn() { return config->depends_on; }
-    ServiceRestartMode Service::Service::restartMode() { return config->restart; }
+    std::string Service::name() const { return config.name; }
+    size_t Service::argc() const { return config.argc; }
+    char **Service::argv() const { return config.argv; }
+    std::vector<std::string> Service::dependsOn() const { return config.depends_on; }
+    ServiceRestartMode Service::Service::restartMode() const { return config.restart; }
 
-    ServiceStatus Service::status() { return state->status; }
-    bool Service::isRunning() { return state->pid != 0; }
-    pid_t Service::pid() { return state->pid; }
-    int Service::exitCode() { return state->exit_code; }
+    ServiceStatus Service::status() const { return state.status; }
+    bool Service::isRunning() const { return state.pid != 0; }
+    pid_t Service::pid() const { return state.pid; }
+    int Service::exitCode() const { return state.exit_code; }
 
-    bool Service::canRestart() {
+    bool Service::canRestart() const {
         switch (restartMode()) {
             case ServiceRestartMode::No:
                 return false;
@@ -54,7 +50,7 @@ namespace Atone {
     }
 
     void Service::Start() {
-        auto service_name = config->name.c_str();
+        auto service_name = config.name.c_str();
 
         Log::info("%s: starting service", service_name);
 
@@ -71,18 +67,18 @@ namespace Atone {
         }
         catch (...) {
             Log::error("%s: failed to spawn service", service_name);
-            state->status = ServiceStatus::Broken;
+            state.status = ServiceStatus::Broken;
             throw;
         }
 
-        state->pid = pid;
-        state->status = ServiceStatus::Running;
+        state.pid = pid;
+        state.status = ServiceStatus::Running;
 
         Log::info("%s: service started (PID=%i)", service_name, pid);
     }
 
     bool Service::Stop(bool _kill) {
-        auto service_name = config->name.c_str();
+        auto service_name = config.name.c_str();
 
         Log::info("%s: stopping service", service_name);
 
@@ -90,7 +86,7 @@ namespace Atone {
             return true;
         }
 
-        auto pid = state->pid;
+        auto pid = state.pid;
         auto signal = _kill ? SIGKILL : SIGTERM;
 
         Log::trace("%s: sending signal to service process: %s", service_name, strsignal(signal));
@@ -112,11 +108,11 @@ namespace Atone {
     }
 
     bool Service::CheckProcessState() {
-        auto service_name = config->name.c_str();
+        auto service_name = config.name.c_str();
 
         Log::trace("%s: checking service process", service_name);
 
-        auto pid = state->pid;
+        auto pid = state.pid;
 
         if (pid == 0) {
             Log::debug("%s: no process is assigned to the service", service_name);
@@ -140,8 +136,8 @@ namespace Atone {
         // on success, returns the process ID of the child whose state has changed
         assert(result == pid);
 
-        state->pid = 0;
-        state->status = ServiceStatus::Broken;
+        state.pid = 0;
+        state.status = ServiceStatus::Broken;
 
         if (WIFEXITED(wstatus)) {
             Log::info("%s: service process exits (PID=%i, EXITCODE=%i)", service_name, pid, WEXITSTATUS(wstatus));

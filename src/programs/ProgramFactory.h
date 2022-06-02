@@ -9,6 +9,6 @@
 namespace Atone {
     class ProgramFactory {
     public:
-        static ProgramBase* CreateProgram(AtoneOptions &options);
+        static std::shared_ptr<ProgramBase> CreateProgram(const AtoneOptions &options);
     };
 }

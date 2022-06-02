@@ -5,7 +5,6 @@
 
 #include <filesystem>
 #include <libgen.h>
-#include <memory>
 #include <string>
 
 #include "config/AtoneOptions.h"
@@ -17,17 +16,18 @@
 #include "exception/AtoneException.h"
 
 namespace Atone {
-    Context::Context(ServicesManager services, std::string workdir)
+    Context::Context(const ServicesManager &services, const std::string &workdir)
         : services(services), workdir(workdir) {
     }
 
-    Context Context::FromOptions(AtoneOptions options) {
+    Context Context::FromOptions(const AtoneOptions &options) {
         switch (options.mode) {
             case AtoneMode::SingleService: {
-                auto service_cfg = std::make_shared<ServiceConfig>(options.serviceName);
-                service_cfg->SetCommandArgs(options.commandArgc, options.commandArgv);
-                auto service = Service(service_cfg);
-                auto services = ServicesManager(service);
+                auto service_cfg = ServiceConfig(options.serviceName);
+                service_cfg.SetCommandArgs(options.commandArgc, options.commandArgv);
+                auto services = ServicesManager();
+                services.Add(service_cfg);
+
                 return Context(services, 0);
             }
 

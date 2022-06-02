@@ -190,13 +190,13 @@ namespace Atone {
             {
                 case 'n':
                     if (strcmp(value, "null") == 0)
-                        return [](AtoneOptions options) {
+                        return [](const AtoneOptions &options) {
                             return std::shared_ptr<Logger>(new NullLogger());
                         };
                     break;
                 case 'o':
                     if (strcmp(value, "output") == 0)
-                        return [](AtoneOptions options) {
+                        return [](const AtoneOptions &options) {
                             return std::shared_ptr<Logger>(new OutputLogger(options.logLevel));
                         };
                     break;
@@ -205,13 +205,13 @@ namespace Atone {
                     {
                         case 'i':
                             if (strcmp(value, "simple") == 0)
-                                return [](AtoneOptions options) {
+                                return [](const AtoneOptions &options) {
                                     return std::shared_ptr<Logger>(new NullLogger());
                             };
                             break;
                         case 'y':
                             if (strcmp(value, "syslog") == 0)
-                                return [](AtoneOptions options) {
+                                return [](const AtoneOptions &options) {
                                     return std::shared_ptr<Logger>(new SyslogLogger());
                             };
                             break;
@@ -219,7 +219,7 @@ namespace Atone {
                     break;
                 case 't':
                     if (strcmp(value, "terminal") == 0)
-                        return [](AtoneOptions options) {
+                        return [](const AtoneOptions &options) {
                             return std::shared_ptr<Logger>(new TerminalLogger(options.logLevel));
                         };
                     break;
@@ -230,7 +230,7 @@ namespace Atone {
         throw std::domain_error("invalid logger");
     }
 
-    std::shared_ptr<Logger> AtoneOptions::DefaultLoggerFactory(AtoneOptions options) {
+    std::shared_ptr<Logger> AtoneOptions::DefaultLoggerFactory(const AtoneOptions &options) {
         if (isatty(1)) {
             return std::make_shared<TerminalLogger>(options.logLevel);
         }

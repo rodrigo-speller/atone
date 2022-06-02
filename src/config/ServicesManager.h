@@ -12,23 +12,22 @@ namespace Atone {
 
     class ServicesManager {
         private:
-            std::map<std::string, Service> services = std::map<std::string, Service>();
+            std::map<std::string, Service&> services;
 
         public:
             ServicesManager();
-            ServicesManager(Service service);
-            ServicesManager(std::map<std::string, Service> services);
 
-            bool isRunning();
+            bool isRunning() const;
 
-            bool TryGetService(pid_t pid, Service *result = NULL);
-            bool TryGetService(const std::string name, Service *result = NULL);
+            void Add(const ServiceConfig &config);
+            bool TryGetService(const pid_t pid, Service *&result) const;
+            bool TryGetService(const std::string &name, Service *&result) const;
 
             void Start();
             bool Stop();
-            bool CheckAllServices();
-            bool CheckService(pid_t pid);
-            bool CheckService(Service service);
+            bool CheckAllServices() const;
+            bool CheckService(const pid_t pid) const;
+            bool CheckService(Service &service) const;
     };
 
 }

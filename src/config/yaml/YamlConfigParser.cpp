@@ -5,7 +5,6 @@
 
 #include <filesystem>
 #include <map>
-#include <memory>
 #include <string>
 
 #include "yaml-cpp/yaml.h"
@@ -52,25 +51,23 @@ namespace Atone {
             throw std::domain_error("invalid services section value");
         }
 
-        auto services = std::map<std::string, Service>();
-
+        auto manager = ServicesManager();
         for (auto entry : services_node) {
             auto service_name = entry.first.as<std::string>();
             auto service = ParseService(service_name, entry.second);
-
-            services.insert(std::pair(service_name, service));
+            manager.Add(service);
         }
 
-        return ServicesManager(services);
+        return manager;
     }
 
-    Service YamlConfigParser::ParseService(const std::string &name, const YAML::Node &config) {
-        auto svcConfig = std::make_shared<ServiceConfig>(name);
+    ServiceConfig YamlConfigParser::ParseService(const std::string &name, const YAML::Node &config) {
+        auto svcConfig = ServiceConfig(name);
 
         switch (config.Type()) {
             case YAML::NodeType::Scalar:
-                svcConfig->SetCommandArgs(config.as<std::string>());
-                return Service(svcConfig);
+                svcConfig.SetCommandArgs(config.as<std::string>());
+                return svcConfig;
 
             case YAML::NodeType::Map:
                 break;
@@ -80,15 +77,15 @@ namespace Atone {
         }
 
         auto command = config["command"];
-        if (command) SetCommandArgs(*svcConfig, command);
+        if (command) SetCommandArgs(svcConfig, command);
 
         auto depends_on = config["depends_on"];
-        if (depends_on) SetDependsOn(*svcConfig, depends_on);
+        if (depends_on) SetDependsOn(svcConfig, depends_on);
 
         auto restart = config["restart"];
-        if (restart) SetRestartMode(*svcConfig, restart);
+        if (restart) SetRestartMode(svcConfig, restart);
 
-        return Service(svcConfig);
+        return svcConfig;
     }
 
     void YamlConfigParser::SetCommandArgs(ServiceConfig &target, const YAML::Node &command) {

@@ -6,7 +6,7 @@
 #include "config/AtoneOptions.h"
 
 namespace Atone {
-    ProgramBase::ProgramBase(AtoneOptions &options)
+    ProgramBase::ProgramBase(const AtoneOptions &options)
         : options(options) {
     }
 }

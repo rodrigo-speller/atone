@@ -3,8 +3,6 @@
 
 #include "NullLogger.h"
 
-#include <memory>
-
 #include "LogLevel.h"
 #include "Logger.h"
 

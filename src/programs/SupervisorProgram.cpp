@@ -18,7 +18,7 @@
 #include "utils/time.h"
 
 namespace Atone {
-    SupervisorProgram::SupervisorProgram(AtoneOptions &options)
+    SupervisorProgram::SupervisorProgram(const AtoneOptions &options)
         : ProgramBase(options) {
     }
 
@@ -115,13 +115,13 @@ namespace Atone {
 
             Log::debug("child process exits (PID=%i)", pid);
 
-            Service service;
-            if (services.TryGetService(pid, &service)) {
-                if (service.CheckProcessState())
+            Service *service;
+            if (services.TryGetService(pid, service)) {
+                if (service->CheckProcessState())
                     throw AtoneException("invalid service process state");
 
                 if (restart_services)
-                    services.CheckService(service);
+                    services.CheckService(*service);
             }
             else {
                 Supervisor::ReapZombieProcess(pid);

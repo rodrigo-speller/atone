@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include "LogLevel.h"
 #include "Logger.h"
 

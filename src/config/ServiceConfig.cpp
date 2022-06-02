@@ -12,10 +12,10 @@
 
 namespace Atone {
 
-    ServiceConfig::ServiceConfig(std::string name) { this->name = name; }
+    ServiceConfig::ServiceConfig(const std::string &name) { this->name = name; }
     ServiceConfig::~ServiceConfig() { FreeCommandArgs(); }
 
-    void ServiceConfig::SetCommandArgs(std::string command) {
+    void ServiceConfig::SetCommandArgs(const std::string &command) {
         wordexp_t we_args;
 
         if (wordexp(command.c_str(), &we_args, 0) != 0) {
@@ -26,7 +26,7 @@ namespace Atone {
         wordfree(& we_args);
     }
 
-    void ServiceConfig::SetCommandArgs(size_t argc, char ** argv) {
+    void ServiceConfig::SetCommandArgs(const size_t argc, char ** argv) {
         FreeCommandArgs();
 
         char **dst_argv = new char *[argc + 1];

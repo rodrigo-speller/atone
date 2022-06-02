@@ -161,7 +161,7 @@ namespace Atone {
         return signum;
     }
 
-    int Supervisor::WaitSignal(siginfo_t *info, timespec &timeout) {
+    int Supervisor::WaitSignal(siginfo_t *info, const timespec &timeout) {
         RequireInstance();
 
         int signum;
