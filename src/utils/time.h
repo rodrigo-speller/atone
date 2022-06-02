@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <time.h>
+#include "atone.h"
 
 namespace Atone {
     int timeout_from_now(struct timespec &time);

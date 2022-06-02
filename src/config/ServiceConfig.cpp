@@ -1,11 +1,9 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#include "ServiceConfig.h"
+#include "atone.h"
 
-#include "yaml-cpp/yaml.h"
-#include <string.h>
-#include <wordexp.h>
+#include "ServiceConfig.h"
 
 #include "ServiceRestartMode.h"
 #include "exception/AtoneException.h"

@@ -1,9 +1,9 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#include "ProgramFactory.h"
+#include "atone.h"
 
-#include <memory>
+#include "ProgramFactory.h"
 
 #include "config/AtoneOptions.h"
 #include "programs/HelpProgram.h"

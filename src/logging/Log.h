@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include <cstdarg>
-#include <memory>
+#include "atone.h"
 
 #include "NullLogger.h"
 #include "LogLevel.h"

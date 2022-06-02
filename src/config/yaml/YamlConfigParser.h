@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <string>
+#include "atone.h"
 
 #include "yaml-cpp/yaml.h"
 

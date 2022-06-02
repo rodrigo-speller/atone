@@ -9,6 +9,8 @@ rebuild: clean build
 
 # project configuration
 
+PRECOMPILE+=src/atone.h
+
 LIBRARY+=optparse
 LIBRARY+=yaml-cpp
 
@@ -26,6 +28,8 @@ CXXFLAGS+=-MMD
 CXXFLAGS+=$(foreach d, $(INCLUDE_PATH), -I$d)
 LDFLAGS+=$(foreach d, $(LIBRARY_PATH), -L$d)
 LDLIBS+=$(foreach d, $(LIBRARY), -l$d)
+PCHINCS+=$(foreach d, $(PCHDIR)/$(PRECOMPILE), -include $d)
+PCHFLAGS+=$(CXXFLAGS) -x c++-header
 
 #-----------------------------------------------------------------------
 
@@ -61,25 +65,28 @@ BUILDDIR?=build
 TARGETDIR?=$(BUILDDIR)/$(TARGET)
 OUTDIR?=$(TARGETDIR)/bin
 OBJDIR?=$(TARGETDIR)/obj
+PCHDIR?=$(TARGETDIR)/pch
 
 #cleanup
 
 CLEAN+=$(OUTDIR)
 CLEAN+=$(OBJDIR)
+CLEAN+=$(PCHDIR)
 
 # artifacts
 
 SOURCES=$(shell find "$(SRCDIR)" -name *.cpp)
 OBJECTS=$(SOURCES:%.cpp=$(OBJDIR)/%.o)
+PCHS=$(PRECOMPILE:%=$(PCHDIR)/%.gch)
 
 # internal targets
 before-build:
 	@echo "Building..."
 	@echo "  Target: $(TARGET)"
 	@echo "  Output directory: $(OUTDIR)"
-	@-mkdir -p $(OUTDIR) $(dir $(OBJECTS))
+	@-mkdir -p $(OUTDIR) $(dir $(OBJECTS)) $(dir $(PCHDIR)/$(PRECOMPILE))
 
-build-core: $(OUTDIR)/atone
+build-core: $(PCHS) $(OUTDIR)/atone
 
 $(OUTDIR)/atone: $(OBJECTS)
 	@echo "  Linking $@"
@@ -87,7 +94,11 @@ $(OUTDIR)/atone: $(OBJECTS)
 
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	@echo "  Compiling $<"
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(PCHINCS) $(CXXFLAGS) -o $@ -c $<
+
+$(PCHS): $(PCHDIR)/%.gch: %
+	@echo "  Precompiling $<"
+	@$(CXX) $(PCHFLAGS) -c $< -o $(PCHDIR)/$<.gch
 
 after-build:
 	@echo "Build completed"
@@ -103,4 +114,5 @@ $(TARGETDIR)/.marker: makefile
 	$(MAKE) clean
 
 -include $(OBJECTS:.o=.d)
+-include $(PCHS:.gch=.d)
 -include $(TARGETDIR)/.marker

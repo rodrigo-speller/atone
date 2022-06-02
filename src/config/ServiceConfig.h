@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include "atone.h"
 
 #include "ServiceRestartMode.h"
 

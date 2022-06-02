@@ -3,10 +3,6 @@
 
 #include "Log.h"
 
-#include <cstdarg>
-#include <memory>
-#include <syslog.h>
-
 #include "NullLogger.h"
 #include "LogLevel.h"
 #include "Logger.h"

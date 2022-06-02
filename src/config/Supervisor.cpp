@@ -1,12 +1,10 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#include <sys/wait.h>
-#include <unistd.h>
-#include <string.h>
-#include <system_error>
+#include "atone.h"
 
 #include "Supervisor.h"
+
 #include "logging/Log.h"
 #include "utils/time.h"
 

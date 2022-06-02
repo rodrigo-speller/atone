@@ -1,13 +1,9 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
+#include "atone.h"
+
 #include "YamlConfigParser.h"
-
-#include <filesystem>
-#include <map>
-#include <string>
-
-#include "yaml-cpp/yaml.h"
 
 #include "config/Context.h"
 #include "config/Service.h"

@@ -1,9 +1,9 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#include "ServicesManager.h"
+#include "atone.h"
 
-#include <map>
+#include "ServicesManager.h"
 
 #include "Service.h"
 #include "exception/AtoneException.h"

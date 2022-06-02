@@ -1,9 +1,9 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#include "VersionProgram.h"
+#include "atone.h"
 
-#include <iostream>
+#include "VersionProgram.h"
 
 #include "config/AtoneOptions.h"
 #include "utils/constants.h"

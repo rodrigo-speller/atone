@@ -3,9 +3,7 @@
 
 #pragma once
 
-#include "optparse.h"
-#include <memory>
-#include <string>
+#include "atone.h"
 
 #include "AtoneMode.h"
 #include "logging/LogLevel.h"

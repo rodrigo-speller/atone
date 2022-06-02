@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <string>
+#include "atone.h"
 
 #include "config/AtoneOptions.h"
 #include "config/ServicesManager.h"

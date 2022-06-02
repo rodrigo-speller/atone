@@ -1,13 +1,9 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#include "Service.h"
+#include "atone.h"
 
-#include <assert.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <system_error>
+#include "Service.h"
 
 #include "Supervisor.h"
 #include "ServiceConfig.h"

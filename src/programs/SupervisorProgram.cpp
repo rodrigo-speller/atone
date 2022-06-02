@@ -1,13 +1,9 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#include "SupervisorProgram.h"
+#include "atone.h"
 
-#include <filesystem>
-#include <iostream>
-#include <sys/wait.h>
-#include <string.h>
-#include <unistd.h>
+#include "SupervisorProgram.h"
 
 #include "exception/AtoneException.h"
 #include "config/AtoneOptions.h"

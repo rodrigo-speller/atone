@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <signal.h>
+#include "atone.h"
 
 #include "ServicesManager.h"
 

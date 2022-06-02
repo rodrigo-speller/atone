@@ -1,11 +1,9 @@
 // Copyright (c) Rodrigo Speller. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-#include "Context.h"
+#include "atone.h"
 
-#include <filesystem>
-#include <libgen.h>
-#include <string>
+#include "Context.h"
 
 #include "config/AtoneOptions.h"
 #include "config/Context.h"
