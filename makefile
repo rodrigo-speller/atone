@@ -25,38 +25,8 @@ CXXFLAGS+=-Wall
 CXXFLAGS+=-fdiagnostics-color=always
 CXXFLAGS+=-std=c++17
 CXXFLAGS+=-MMD
-CXXFLAGS+=$(foreach d, $(INCLUDE_PATH), -I$d)
-LDFLAGS+=$(foreach d, $(LIBRARY_PATH), -L$d)
-LDLIBS+=$(foreach d, $(LIBRARY), -l$d)
-PCHINCS+=$(foreach d, $(PCHDIR)/$(PRECOMPILE), -include $d)
-PCHFLAGS+=$(CXXFLAGS) -x c++-header
 
 #-----------------------------------------------------------------------
-
-DEBUG?=0
-VERBOSE?=0
-
-ifneq ($(DEBUG), 0)
-	TARGET=debug
-    CXXFLAGS+=-g
-	CXXFLAGS+=-Og
-else
-	TARGET=release
-    CXXFLAGS+=-Os -ffunction-sections -fdata-sections
-    LDFLAGS+=-Wl,--gc-sections -s
-endif
-
-ifneq ($(VERBOSE), 0)
-    CXXFLAGS+=-v
-endif
-
-ifdef ATONE_BUILD_VERSION
-    CXXFLAGS+=-D "ATONE_BUILD_VERSION=\"$(ATONE_BUILD_VERSION)\""
-endif
-
-ifdef ATONE_BUILD_NUMBER
-    CXXFLAGS+=-D "ATONE_BUILD_NUMBER=\"$(ATONE_BUILD_NUMBER)\""
-endif
 
 # default directories
 
@@ -73,13 +43,51 @@ CLEAN+=$(OUTDIR)
 CLEAN+=$(OBJDIR)
 CLEAN+=$(PCHDIR)
 
+# input parameters
+
+DEBUG?=0
+VERBOSE?=0
+
+ifneq ($(DEBUG), 0)
+    TARGET=debug
+    CXXFLAGS+=-g
+    CXXFLAGS+=-Og
+else
+    TARGET=release
+    CXXFLAGS+=-Os -ffunction-sections -fdata-sections
+    LDFLAGS+=-Wl,--gc-sections -s
+endif
+
+ifneq ($(VERBOSE), 0)
+    CXXFLAGS+=-v
+endif
+
+ifdef ATONE_BUILD_VERSION
+    CXXFLAGS+=-D "ATONE_BUILD_VERSION=\"$(ATONE_BUILD_VERSION)\""
+endif
+
+ifdef ATONE_BUILD_NUMBER
+    CXXFLAGS+=-D "ATONE_BUILD_NUMBER=\"$(ATONE_BUILD_NUMBER)\""
+endif
+
 # artifacts
 
 SOURCES=$(shell find "$(SRCDIR)" -name *.cpp)
 OBJECTS=$(SOURCES:%.cpp=$(OBJDIR)/%.o)
 PCHS=$(PRECOMPILE:%=$(PCHDIR)/%.gch)
 
+# expand variables
+
+CXXFLAGS+=$(foreach d, $(INCLUDE_PATH), -I$d)
+LDFLAGS+=$(foreach d, $(LIBRARY_PATH), -L$d)
+LDLIBS+=$(foreach d, $(LIBRARY), -l$d)
+PCHINCS+=$(foreach d, $(PCHDIR)/$(PRECOMPILE), -include $d)
+PCHFLAGS+=$(CXXFLAGS) -x c++-header
+
 # internal targets
+
+# BUILD
+
 before-build:
 	@echo "Building..."
 	@echo "  Target: $(TARGET)"
@@ -103,6 +111,8 @@ $(PCHS): $(PCHDIR)/%.gch: %
 after-build:
 	@echo "Build completed"
 
+# CLEAN
+
 clean:
 	@-rm -rv -- $(CLEAN) || true
 
@@ -112,6 +122,8 @@ clean-all:
 $(TARGETDIR)/.marker: makefile
 	@touch $@
 	$(MAKE) clean
+
+# includes
 
 -include $(OBJECTS:.o=.d)
 -include $(PCHS:.gch=.d)

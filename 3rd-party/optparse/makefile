@@ -16,9 +16,25 @@ ARFLAGS=rc
 CXXFLAGS+=-Wall
 CXXFLAGS+=-fdiagnostics-color=always
 CXXFLAGS+=-std=c++17
-CXXFLAGS+=$(foreach d, $(INCLUDE_PATH), -I$d)
+CXXFLAGS+=-MMD
 
 #-----------------------------------------------------------------------
+
+# default directories
+
+SRCDIR?=src
+INSTALLDIR?=lib
+BUILDDIR?=build
+TARGETDIR?=$(BUILDDIR)/$(TARGET)
+OUTDIR?=$(TARGETDIR)/bin
+OBJDIR?=$(TARGETDIR)/obj
+
+# cleanup
+
+CLEAN+=$(OUTDIR)
+CLEAN+=$(OBJDIR)
+
+# input parameters
 
 DEBUG?=0
 VERBOSE?=0
@@ -36,24 +52,14 @@ ifneq ($(VERBOSE), 0)
     CXXFLAGS+=-v
 endif
 
-# default directories
-
-SRCDIR?=src
-INSTALLDIR?=lib
-BUILDDIR?=build
-TARGETDIR?=$(BUILDDIR)/$(TARGET)
-OUTDIR?=$(TARGETDIR)/bin
-OBJDIR?=$(TARGETDIR)/obj
-
-# cleanup
-
-CLEAN+=$(OUTDIR)
-CLEAN+=$(OBJDIR)
-
 # artifacts
 
 SOURCES=$(shell find "$(SRCDIR)" -name *.cpp)
 OBJECTS=$(SOURCES:%.cpp=$(OBJDIR)/%.o)
+
+# expand variables
+
+CXXFLAGS+=$(foreach d, $(INCLUDE_PATH), -I$d)
 
 # internal targets
 
@@ -103,6 +109,8 @@ clean-all:
 $(TARGETDIR)/.marker: makefile
 	@touch $@
 	$(MAKE) clean
+
+# includes
 
 -include $(OBJECTS:.o=.d)
 -include $(TARGETDIR)/.marker
