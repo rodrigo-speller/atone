@@ -173,6 +173,15 @@ namespace Atone {
         return pid;
     }
 
+
+    /**
+     * Wait for a signal.
+     * 
+     * @param info If the info argument is not NULL, then the buffer that it
+     *             points to is used to return a structure of type siginfo_t
+     *             containing information about the signal.
+     * @return Returns the signal number, or -1 if the call fail.
+     */
     int Supervisor::WaitSignal(siginfo_t *info) {
         RequireInstance();
 
@@ -186,6 +195,16 @@ namespace Atone {
         return signum;
     }
 
+    /**
+     * Wait for a signal.
+     * 
+     * @param info If the info argument is not NULL, then the buffer that it
+     *             points to is used to return a structure of type siginfo_t
+     *             containing information about the signal.
+     * @param timeout Specifies a minimum interval for which the thread is
+     *                suspended waiting for a signal
+     * @return Returns the signal number, or 0 if the operation was timed-out, or -1 if the call fail.
+     */
     int Supervisor::WaitSignal(siginfo_t *info, const timespec &timeout) {
         RequireInstance();
 
@@ -202,8 +221,10 @@ namespace Atone {
         if ((signum = sigtimedwait(&instance->atoneSigset, info, &_timeout)) == -1) {
             auto err = errno;
 
-            if (err == EAGAIN)
+            if (err == EAGAIN) {
+                // timeout
                 return 0;
+            }
 
             Log::crit("sigwait failed: %s", strerror(err));
             return -1;
