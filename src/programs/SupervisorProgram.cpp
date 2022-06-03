@@ -63,8 +63,7 @@ namespace Atone {
         auto &services = context.services;
 
         // wait signal loop
-        bool terminate = false;
-        while (!terminate) {
+        while (true) {
             siginfo_t siginfo;
             int signum = Supervisor::WaitSignal(&siginfo);
 
@@ -78,8 +77,7 @@ namespace Atone {
                 // terminate process
                 case SIGTERM: {
                     Log::debug("signal received: %s", strsignal(signum));
-                    terminate = true;
-                    break;
+                    return;
                 }
                 // child process exited
                 case SIGCHLD: {
@@ -88,7 +86,7 @@ namespace Atone {
                     // reap child process
                     if (ReapProcesses(services, true)) {
                         // no more processes still running
-                        terminate = true;
+                        return;
                     }
                     
                     break;
