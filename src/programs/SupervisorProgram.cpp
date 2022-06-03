@@ -19,57 +19,94 @@ namespace Atone {
     }
 
     int SupervisorProgram::Run() {
-        auto atone_pid = getpid();
+        auto pid = getpid();
+        Log::info("starting supervisor... (PID=%i)", pid);
 
-        Log::info("starting supervisor... (PID=%i)", atone_pid);
-
-        // start
-
-        if (atone_pid != 1) {
+        // atone supervisor must be executed as an init process (pid = 1)
+        // to adopt orphan processes, to be able to terminate, kill and reap them
+        if (pid != 1) {
             throw AtoneException("atone must run as init process (pid must be 1)");
         }
 
-        auto atone = Context::FromOptions(options);
-        auto services = atone.services;
+        // execution context
+        auto context = Context::FromOptions(options);
 
-        if (!atone.workdir.empty()) {
-            std::filesystem::current_path(atone.workdir);
+        Bootstrap(context);
+        MainLoop(context);
+        Shutdown(context);
+
+        Log::info("exit supervisor (PID=%i)", getpid());
+        return 0;
+    }
+
+    /**
+     * Supervisor bootstrap.
+     * @param context Execution context.
+     */
+    void SupervisorProgram::Bootstrap(Context &context) {
+        auto &services = context.services;
+
+        // changes current working directory, if specified
+        if (!context.workdir.empty()) {
+            std::filesystem::current_path(context.workdir);
         }
 
+        // starts the services
         services.Start();
+    }
 
-        // running
+    /**
+     * Supervisor main loop.
+     * @param context Execution context.
+     */
+    void SupervisorProgram::MainLoop(Context &context) {
+        auto &services = context.services;
 
+        // wait signal loop
         bool terminate = false;
-        while (!terminate) { // wait signal loop
+        while (!terminate) {
             siginfo_t siginfo;
             int signum = Supervisor::WaitSignal(&siginfo);
 
             switch (signum) {
+                // Hangup detected on controlling terminal or death of controlling process
                 case SIGHUP:
+                // interrupt by user
                 case SIGINT:
+                // terminate process with core dump
                 case SIGQUIT:
+                // terminate process
                 case SIGTERM: {
                     Log::debug("signal received: %s", strsignal(signum));
                     terminate = true;
                     break;
                 }
+                // child process exited
                 case SIGCHLD: {
                     Log::debug("signal received: %s (PID=%i)", strsignal(signum), siginfo.si_pid);
 
+                    // reap child process
                     if (ReapProcesses(services, true)) {
+                        // no more processes still running
                         terminate = true;
                     }
                     
                     break;
                 }
+                // any other signal
                 default:
                     Log::debug("unhandled signal received: %s", strsignal(signum));
                     break;
             }
         }
+    }
 
-        // stop
+    /**
+     * Supervisor shutdown.
+     * @param context Execution context.
+     */
+    void SupervisorProgram::Shutdown(Context &context) {
+        auto &services = context.services;
 
         // TODO: define a timeout for stopping services and terminate all processes
         timespec timeout = { 5, 0 };
@@ -87,9 +124,6 @@ namespace Atone {
         // at this point, all processes are terminated (or killed)
         // them reap any remaining zombie processes
         Supervisor::ReapZombieProcess();
-
-        Log::info("exit supervisor (PID=%i)", getpid());
-        return 0;
     }
 
     /**

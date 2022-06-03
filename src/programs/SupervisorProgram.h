@@ -11,6 +11,10 @@
 namespace Atone {
     class SupervisorProgram: public ProgramBase {
     private:
+        void SupervisorProgram::Bootstrap(Context &context);
+        void SupervisorProgram::MainLoop(Context &context);
+        void SupervisorProgram::Shutdown(Context &context);
+
         bool ReapProcesses(ServicesManager &services, bool restart = false);
         bool TerminateAllProcess(ServicesManager &services, timespec timeout);
         bool StopAllServices(ServicesManager &services, timespec timeout);
