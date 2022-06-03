@@ -74,7 +74,7 @@ namespace Atone {
         timespec timeout = { 5, 0 };
         timeout_from_now(timeout);
 
-        // stop all services before to kill all process
+        // stop all services before to terminate all processes
         // to allow the services gracefully terminates
         // their children processes 
         StopAllServices(services, timeout);
@@ -89,7 +89,7 @@ namespace Atone {
     /**
      * Request to reap all zombie processes.
      * 
-     * @param services The services to collect services.
+     * @param services The services manager to collect the services.
      * @param restart_services If true, restart all services that can be restarted.
      * @return After all zombie processes is reaped, returns true if ll child processes is terminated.
      *         And false, if any child process is still running.
