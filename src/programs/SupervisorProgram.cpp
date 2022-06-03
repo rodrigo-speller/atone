@@ -78,10 +78,14 @@ namespace Atone {
         // stop all services
         // to allow the services gracefully terminates their children processes
         StopAllServices(services, timeout);
+
+        // terminate remaining processes
         if (!TerminateAllProcess(services, timeout)) {
             // TODO: define exit code for this case
         }
-        
+
+        // at this point, all processes are terminated (or killed)
+        // them reap any remaining zombie processes
         Supervisor::ReapZombieProcess();
 
         Log::info("exit supervisor (PID=%i)", getpid());
@@ -200,34 +204,54 @@ namespace Atone {
         }
     }
 
+    /**
+     * Stop all services.
+     * @param services The services manager to collect the services.
+     * @param timeout The timeout to wait for all services to stop.
+     */
     bool SupervisorProgram::StopAllServices(ServicesManager &services, timespec timeout) {
         Log::trace("stopping all services");
 
-        if (services.Stop())
+        // request to stop all services
+        if (services.Stop()) {
             return true;
+        }
         
-        Log::trace("waiting one or more process to stop");
-
+        Log::trace("awaiting remaining services to stop");
         while (services.isRunning()) {
             siginfo_t siginfo;
             auto signum = Supervisor::WaitSignal(&siginfo, timeout);
 
             switch (signum) {
-                case 0: // timeout
-                    Log::warn("stopping process timeout");
+                // wait signal has timed-out
+                // returns with false
+                case 0:
+                    Log::warn("service stop timed-out");
                     return false;
 
+                // child process exits
+                // collect the child processes and loop again
                 case SIGCHLD: {
                     Log::debug("signal received: %s (PID=%i)", strsignal(signum), siginfo.si_pid);
-                    ReapProcesses(services, false);
+
+                    // reap the child processes
+                    if (ReapProcesses(services, false)) {
+                        // no more child process still running
+                        // returns with true
+                        return true;
+                    }
                     break;
                 }
+                // any other signal
+                // just loop again
                 default:
                     Log::debug("unhandled signal received: %s", strsignal(signum));
                     break;
             }
         }
 
+        // no more service is running
+        // returns with true
         return true;
     }
 }

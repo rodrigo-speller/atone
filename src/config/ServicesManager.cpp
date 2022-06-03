@@ -69,14 +69,19 @@ namespace Atone {
         }
     }
 
+    /**
+     * Request to stop all services.
+     * @return Returns true if all services are stopped.
+     *         Otherwise, if any service is still running, returns false.
+     */
     bool ServicesManager::Stop() {
         auto success = true;
 
+        // TODO: dependency order
+
         for (auto entry : services) {
             auto service = entry.second;
-
-            if (!service.Stop())
-                success = false;
+            success &= service.Stop();
         }
 
         return success;
