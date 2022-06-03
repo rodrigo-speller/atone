@@ -71,6 +71,7 @@ namespace Atone {
 
         // stop
 
+        // TODO: define a timeout for stopping services and terminate all processes
         timespec timeout = { 5, 0 };
         timeout_from_now(timeout);
 
@@ -78,7 +79,9 @@ namespace Atone {
         // to allow the services gracefully terminates
         // their children processes 
         StopAllServices(services, timeout);
-        KillAllProcess(services, timeout);
+        if (!TerminateAllProcess(services, timeout)) {
+            // TODO: define exit code for this case
+        }
         
         Supervisor::ReapZombieProcess();
 
@@ -128,71 +131,73 @@ namespace Atone {
         }
     }
 
-    void SupervisorProgram::KillAllProcess(ServicesManager &services, timespec timeout) {
+    /**
+     * Terminate (or kill) all child processes.
+     * @param services The services manager to collect the services.
+     * @param timeout The timeout to wait for all child processes to terminate.
+     *                After the timeout, all remaining child processes will be killed.
+     * @return Returns true if all child processes was gracefully terminated, otherwise false.
+     */
+    bool SupervisorProgram::TerminateAllProcess(ServicesManager &services, timespec timeout) {
         Log::trace("terminating child process");
 
         // sends TERM signal to all process
-        if (kill(-1, SIGTERM) != 0) {
-            auto err = errno;
-
-            // completed
-            if (err == ESRCH) {
-                Log::notice("no child process is running");
-                return;
-            }
-
-            throw std::system_error(err, std::system_category(), "terminating child process failed");
+        if (!Supervisor::SendSignal(-1, SIGTERM)) {
+            Log::notice("no child process is running");
+            return true;
         }
 
+        // graceful termination status
+        // starts as true, because no KILL signal has been sent yet
+        bool gracefully = true;
         while (true) {
-
             siginfo_t siginfo;
             auto signum = Supervisor::WaitSignal(&siginfo, timeout);
 
             switch (signum) {
-
-                case 0: { // timeout
+                // wait signal has timed-out
+                // sends KILL signal to kill all process
+                // if any process is still running: loop again
+                case 0: {
                     Log::trace("killing child process");
 
                     // sends KILL signal to all process
-                    if (kill(-1, SIGKILL) != 0) {
-                        auto err = errno;
-
-                        // completed
-                        if (err == ESRCH) {
-                            Log::notice("no child process is running");
-                            return;
-                        }
-
-                        throw std::system_error(err, std::system_category(), "killing child process failed");
+                    if (!Supervisor::SendSignal(-1, SIGKILL)) {
+                        return gracefully;
                     }
 
-                    if (ReapProcesses(services, false))
-                        return;
+                    // after this point, any exit signal from the child process
+                    // will be treated as a consequence of the KILL signal
+                    gracefully = false;
 
+                    // updates the timeout to wait for a short time in the next iteration
+                    // TODO: defines short-timeout value
                     timeout = { 0, 1000000 /* 1ms */ };
                     timeout_from_now(timeout);
 
                     break;
                 }
-
+                // child process exits
+                // collect the child processes and loop again
                 case SIGCHLD: {
                     Log::debug("signal received: %s (PID=%i)", strsignal(signum), siginfo.si_pid);
 
-                    if (ReapProcesses(services, false))
-                        return;
+                    // reap the child processes
+                    if (ReapProcesses(services, false)) {
+                        // no more child process still running
+                        return gracefully;
+                    }
 
                     break;
                 }
-
+                // any other signal
+                // just loop again
                 default: {
                     Log::debug("unhandled signal received: %s", strsignal(signum));
                     break;
                 }
-
             }
         }
-
     }
 
     bool SupervisorProgram::StopAllServices(ServicesManager &services, timespec timeout) {

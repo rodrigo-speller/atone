@@ -12,7 +12,7 @@ namespace Atone {
     class SupervisorProgram: public ProgramBase {
     private:
         bool ReapProcesses(ServicesManager &services, bool restart = false);
-        void KillAllProcess(ServicesManager &services, timespec timeout);
+        bool TerminateAllProcess(ServicesManager &services, timespec timeout);
         bool StopAllServices(ServicesManager &services, timespec timeout);
     public:
         SupervisorProgram(const AtoneOptions &options);
