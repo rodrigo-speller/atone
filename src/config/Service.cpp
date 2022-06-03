@@ -87,14 +87,7 @@ namespace Atone {
 
         Log::trace("%s: sending signal to service process: %s", service_name, strsignal(signal));
 
-        if (kill(pid, signal) != 0) {
-            auto _errno = errno;
-
-            if (_errno != ESRCH) {
-                Log::crit("%s: service process kill failed: %s", service_name, strerror(_errno));
-                throw std::system_error(_errno, std::system_category(), "kill failed");
-            }
-        }
+        Supervisor::SendSignal(pid, signal);
 
         if (_kill) {
             waitid(P_PID, pid, nullptr, WNOWAIT | WEXITED);

@@ -173,6 +173,27 @@ namespace Atone {
         return pid;
     }
 
+    /**
+     * Send a signal to a child process.
+     * 
+     * @param pid The pid of the child process to send the signal to.
+     * @param signum The signal number to send.
+     * @return Returns true if the signal was sent successfully, false if the process was not found.
+     */
+    bool Supervisor::SendSignal(const pid_t pid, const int signum) {
+        if (kill(pid, signum) == 0) {
+            Log::debug("signal sent (PID=%i, signal=%i)", pid, signum);
+            return true;
+        }
+
+        auto _errno = errno;
+        if (_errno == ESRCH) {
+            Log::debug("no process found (PID=%i)", pid);
+            return false;
+        }
+
+        throw std::system_error(_errno, std::system_category(), "send sigal failed");
+    }
 
     /**
      * Wait for a signal.
