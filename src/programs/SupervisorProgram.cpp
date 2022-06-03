@@ -21,7 +21,7 @@ namespace Atone {
     int SupervisorProgram::Run() {
         auto atone_pid = getpid();
 
-        Log::info("starting... (PID=%i)", atone_pid);
+        Log::info("starting supervisor... (PID=%i)", atone_pid);
 
         // start
 
@@ -75,9 +75,8 @@ namespace Atone {
         timespec timeout = { 5, 0 };
         timeout_from_now(timeout);
 
-        // stop all services before to terminate all processes
-        // to allow the services gracefully terminates
-        // their children processes 
+        // stop all services
+        // to allow the services gracefully terminates their children processes
         StopAllServices(services, timeout);
         if (!TerminateAllProcess(services, timeout)) {
             // TODO: define exit code for this case
@@ -85,7 +84,7 @@ namespace Atone {
         
         Supervisor::ReapZombieProcess();
 
-        Log::info("exit (PID=%i)", getpid());
+        Log::info("exit supervisor (PID=%i)", getpid());
         return 0;
     }
 
@@ -94,7 +93,7 @@ namespace Atone {
      * 
      * @param services The services manager to collect the services.
      * @param restart_services If true, restart all services that can be restarted.
-     * @return After all zombie processes is reaped, returns true if ll child processes is terminated.
+     * @return After all zombie processes is reaped, returns true if all child processes is terminated.
      *         And false, if any child process is still running.
      */
     bool SupervisorProgram::ReapProcesses(ServicesManager &services, bool restart_services) {
@@ -159,6 +158,7 @@ namespace Atone {
                 // sends KILL signal to kill all process
                 // if any process is still running: loop again
                 case 0: {
+                    Log::warn("stopping process timeout");
                     Log::trace("killing child process");
 
                     // sends KILL signal to all process
