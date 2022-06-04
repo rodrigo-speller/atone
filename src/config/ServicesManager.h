@@ -26,7 +26,6 @@ namespace Atone {
             void Start();
             bool Stop();
             bool CheckAllServices() const;
-            bool CheckService(const pid_t pid) const;
             bool CheckService(Service &service) const;
     };
 

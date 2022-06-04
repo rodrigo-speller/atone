@@ -101,19 +101,6 @@ namespace Atone {
         return result;
     }
 
-    bool ServicesManager::CheckService(const pid_t pid) const {
-        for (auto entry : services) {
-            auto service = entry.second;
-
-            if (service.pid() != pid)
-                continue;
-    
-            return CheckService(service);
-        }
-
-        return false;
-    }
-
     bool ServicesManager::CheckService(Service &service) const {
         auto service_name = service.name().c_str();
 
