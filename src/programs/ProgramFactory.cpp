@@ -5,6 +5,7 @@
 
 #include "ProgramFactory.h"
 
+#include "config/AtoneMode.h"
 #include "config/AtoneOptions.h"
 #include "programs/HelpProgram.h"
 #include "programs/ProgramBase.h"
@@ -15,12 +16,19 @@ namespace Atone {
     std::shared_ptr<ProgramBase> ProgramFactory::CreateProgram(const AtoneOptions &options) {
         ProgramBase *program;
 
-        if (options.usage) {
+        switch (options.mode) {
+        case AtoneMode::Help:
             program = new HelpProgram(options);
-        } else if (options.version) {
+            break;
+        case AtoneMode::Version:
             program = new VersionProgram(options);
-        } else {
+            break;
+        case AtoneMode::SingleService:
+        case AtoneMode::MultiServices:
             program = new SupervisorProgram(options);
+            break;
+        default:
+            throw std::domain_error("invalid mode");
         }
 
         return std::shared_ptr<ProgramBase>(program);

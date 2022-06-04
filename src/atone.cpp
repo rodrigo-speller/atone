@@ -18,12 +18,7 @@ int main(int argc, char **argv) {
     try {
         // parse args
 
-        AtoneOptions options;
-        options.LoadArgs(argc, argv);
-
-        if (!options.errorMessage.empty()) { // options error
-            throw std::domain_error("load options failed: " + options.errorMessage);
-        }
+        const auto options = AtoneOptions::FromArgs(argc, argv);
 
         // setup
 

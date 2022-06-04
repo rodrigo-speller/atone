@@ -5,7 +5,7 @@
 
 #include "AtoneOptions.h"
 
-#include "AtoneMode.h"
+#include "config/AtoneMode.h"
 #include "logging/Logger.h"
 #include "logging/NullLogger.h"
 #include "logging/OutputLogger.h"
@@ -13,16 +13,22 @@
 #include "logging/TerminalLogger.h"
 
 namespace Atone {
+    /**
+     * Loads the options from the command line arguments.
+     * @param argc The number of arguments.
+     * @param argv The arguments.
+     * @returns The options.
+     */
+    AtoneOptions AtoneOptions::FromArgs(size_t argc, char **argv) {
+        // INITIALIZE OPTIONS DEFINTION
 
-    void AtoneOptions::LoadArgs(size_t argc, char **argv) {
-        this->argc = argc;
-        this->argv = argv;
+        struct OptionDef {
+            const struct optparse_long optparse;
+            const AtoneMode mode;
+        };
 
-        struct optparse state;
-
-        optparse_init(&state, argv);
-
-        struct Option options[] = {
+        // the options definition matrix
+        const struct OptionDef options_defs[] = {
             {"config", 'c', OPTPARSE_OPTIONAL, AtoneMode::MultiServices},
             {"help",   'h', OPTPARSE_NONE,     AtoneMode::Help         },
             {"log",    'l', OPTPARSE_REQUIRED, AtoneMode::Undefined    },
@@ -31,75 +37,102 @@ namespace Atone {
             {"version",'v', OPTPARSE_NONE,     AtoneMode::Version      },
             NULL
         };
-        const int options_len = sizeof(options) / sizeof(Option);
+
+        // initialize optparse options definition matrix
+        
+        const int options_len = sizeof(options_defs) / sizeof(OptionDef);
 
         struct optparse_long options_long[options_len];
         for(int i = 0; i < options_len; i++) {
-            auto option = options[i];
-            options_long[i] = { option.parser.longname, option.parser.shortname, option.parser.argtype };
+            auto option = options_defs[i];
+            options_long[i] = option.optparse;
         }
+
+        // PARSE OPTIONS
+
+        AtoneOptions options;
+
+        options.argc = argc;
+        options.argv = argv;
 
         int option_index;
         int option_char;
+        struct optparse state;
+        optparse_init(&state, argv);
         while ((option_char = optparse_long(&state, options_long, &option_index)) != -1) {
-            auto option = options[option_index];
             switch (option_char) {
-                case 'c':
+                case 'c': // config
                     if (state.optarg) {
-                        configFile = state.optarg;
+                        options.configFile = state.optarg;
                     }
                     break;
-                case 'h':
-                    usage = true;
+                case 'h': // help
+                    // sets the mode to AtoneMode::Help
                     break;
-                case 'l':
-                    logLevel = ParseLogLevel(state.optarg);
+                case 'l': // log
+                    options.logLevel = ParseLogLevel(state.optarg);
                     break;
-                case 'L':
-                    loggerFactory = ParseLogger(state.optarg);
+                case 'L': // logger
+                    options.loggerFactory = ParseLogger(state.optarg);
                     break;
-                case 'n':
-                    serviceName = state.optarg;
+                case 'n': // name
+                    options.serviceName = state.optarg;
                     break;
-                case 'v':
-                    version = true;
+                case 'v': // version
+                    // sets the mode to AtoneMode::Version
                     break;
-                case '?':
-                    errorMessage = state.errmsg;
-                    if (errorMessage.empty()) {
-                        errorMessage = "unknown error";
+                case '?': // error
+                    if (state.errmsg[0] == '\0') {
+                        throw std::domain_error("unknown error");
                     }
-                    return;
+                    throw std::domain_error(state.errmsg);
             }
 
-            if (option.mode != AtoneMode::Undefined) { // sets mode
-                if (mode == AtoneMode::Undefined) {
-                    mode = option.mode;
-                } else if (mode != option.mode) {
-                    errorMessage = std::string("unexpected option -- '")
-                        + option.parser.longname
-                        + "'";
-                    return;
+            // sets the mode to AtoneMode::SingleService if the service name is defined
+            const auto &optionDef = options_defs[option_index];
+
+            // sets the mode of atone according to the option
+            if (optionDef.mode != AtoneMode::Undefined) {
+                if (options.mode == AtoneMode::Undefined) {
+                    options.mode = optionDef.mode;
+                } else if (options.mode != optionDef.mode) {
+                    throw std::domain_error(
+                        std::string("unexpected option -- '")
+                        + optionDef.optparse.longname
+                        + "'"
+                    );
                 }
             }
         }
 
-        // check for remaining args
+        // CHECK FOR REMAINING ARGS
+
         if (argv[state.optind]) {
-            if (mode == AtoneMode::Undefined) {
-                mode = AtoneMode::SingleService;
+            // if has remaining args, then the default mode is single-service
+            if (options.mode == AtoneMode::Undefined) {
+                options.mode = AtoneMode::SingleService;
             }
             
-            if (mode == AtoneMode::SingleService) {
-                this->commandArgc = argc - state.optind;
-                this->commandArgv = &argv[state.optind];
+            if (options.mode == AtoneMode::SingleService) {
+                // remaining args are the command args for the service on single-service mode
+                options.commandArgc = argc - state.optind;
+                options.commandArgv = &argv[state.optind];
             }
             else {
-                errorMessage = "invalid arguments";
+                // if the mode is not single-service, then the remaining args
+                // are invalid
+                throw std::domain_error("invalid arguments");
             }
         }
+
+        return options;
     }
 
+    /**
+     * Parses the log level from string.
+     * @param logLevel The log level string.
+     * @return The log level value.
+     */
     LogLevel AtoneOptions::ParseLogLevel(const char *level) {
         const int sz = sizeof("information") + 1;
         char value[sz];
@@ -165,6 +198,11 @@ namespace Atone {
         throw std::domain_error("invalid log level");
     }
 
+    /**
+     * Parses the logger factory function from string.
+     * @param logger The logger factory string.
+     * @return The logger factory function.
+     */
     AtoneOptions::LoggerFactory AtoneOptions::ParseLogger(const char *logger) {
         const int sz = sizeof("terminal") + 1;
         char value[sz];
@@ -224,11 +262,20 @@ namespace Atone {
         throw std::domain_error("invalid logger");
     }
 
+    /**
+     * Builds the default logger. This method defines the default logger factory
+     * for the options.
+     * @param options The atone options to get the log level.
+     * @return A shared pointer to the built logger.
+     */
     std::shared_ptr<Logger> AtoneOptions::DefaultLoggerFactory(const AtoneOptions &options) {
         if (isatty(1)) {
+            // if stdout is a terminal, then use the terminal logger to
+            // print styled output
             return std::make_shared<TerminalLogger>(options.logLevel);
         }
 
+        // otherwise, use the output logger to print to stdout
         return std::make_shared<OutputLogger>(options.logLevel);
     }
 }
