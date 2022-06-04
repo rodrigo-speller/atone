@@ -6,14 +6,15 @@
 #include "ProgramBase.h"
 
 #include "config/AtoneOptions.h"
+#include "config/Context.h"
 #include "config/ServicesManager.h"
 
 namespace Atone {
     class SupervisorProgram: public ProgramBase {
     private:
-        void SupervisorProgram::Bootstrap(Context &context);
-        void SupervisorProgram::MainLoop(Context &context);
-        void SupervisorProgram::Shutdown(Context &context);
+        void Bootstrap(Context &context);
+        void MainLoop(Context &context);
+        void Shutdown(Context &context);
 
         bool ReapProcesses(ServicesManager &services, bool restart = false);
         bool TerminateAllProcess(ServicesManager &services, timespec timeout);

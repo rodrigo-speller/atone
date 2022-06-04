@@ -32,7 +32,7 @@ namespace Atone {
             static void ReapZombieProcess(const pid_t pid = -1);
             static pid_t Spawn(char *const argv[]);
             static pid_t CheckForExitedProcess();
-            static bool Supervisor::SendSignal(const pid_t pid, const int signum);
+            static bool SendSignal(const pid_t pid, const int signum);
             static int WaitSignal(siginfo_t *info);
             static int WaitSignal(siginfo_t *info, const timespec &timeout);
     };
