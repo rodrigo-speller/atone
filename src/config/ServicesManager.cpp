@@ -5,14 +5,15 @@
 
 #include "ServicesManager.h"
 
-#include "Service.h"
+#include "config/Service.h"
 #include "exception/AtoneException.h"
 #include "logging/Log.h"
 
 namespace Atone {
-
-    ServicesManager::ServicesManager() {}
-
+    /**
+     * Checks if any service is running.
+     * @return Returns true if any service is running, otherwise false.
+     */
     bool ServicesManager::isRunning() const {
         for (auto entry : services) {
             auto service = entry.second;
@@ -24,11 +25,21 @@ namespace Atone {
         return false;
     }
 
+    /**
+     * Add a service to the manager.
+     * @param config The service configuration.
+     */
     void ServicesManager::Add(const ServiceConfig &config) {
         auto service = new Service(config);
         services.insert({ service->name(), *service });
     }
 
+    /**
+     * Try to get a service by its PID.
+     * @param pid The PID of the service.
+     * @param result The service.
+     * @return Returns true if the service was found, otherwise false.
+     */
     bool ServicesManager::TryGetService(const pid_t pid, Service *&result) const {
         for (auto entry : services) {
             auto service = entry.second;
@@ -39,10 +50,15 @@ namespace Atone {
                 return true;
             }
         }
-
         return false;
     }
 
+    /**
+     * Tries to get a service by name.
+     * @param name The service name.
+     * @param result The service result.
+     * @return Returns true if the service was found, otherwise false.
+     */
     bool ServicesManager::TryGetService(const std::string &name, Service *&result) const {
         auto entry = services.find(name);
 
@@ -54,6 +70,9 @@ namespace Atone {
         return false;
     }
 
+    /**
+     * Request to start all services.
+     */
     void ServicesManager::Start() {
         for (auto entry : services) {
             auto service = entry.second;
@@ -62,6 +81,7 @@ namespace Atone {
             auto dependency_names = service.dependsOn();
             for (auto dependency_name : dependency_names) {
                 auto dependency_service = services.at(dependency_name);
+                // TODO: check if dependency service exists
                 dependency_service.Start();
             }
 
@@ -87,20 +107,29 @@ namespace Atone {
         return success;
     }
 
+    /**
+     * Request to check the state of all services. If any service is not running,
+     * and it can be restarted, it will be restarted.
+     * @return Returns true if all services are running.
+     *         Otherwise, if any service is not running, returns false.
+     */
     bool ServicesManager::CheckAllServices() const {
         auto result = false;
-
-        Log::trace("checking all services");
 
         for (auto entry : services) {
             result |= CheckService(entry.second);
         }
 
-        Log::debug("no service is running");
-
         return result;
     }
 
+    /**
+     * Request to check the state of a service. If the service is not running,
+     * and it can be restarted, it will be restarted.
+     * @param service The service to check.
+     * @return Returns true if the service is running.
+     *         Otherwise, if the service is not running, returns false.
+     */
     bool ServicesManager::CheckService(Service &service) const {
         auto service_name = service.name().c_str();
 
@@ -122,5 +151,4 @@ namespace Atone {
 
         return false;
     }
-
 }

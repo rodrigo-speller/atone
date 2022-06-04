@@ -12,11 +12,9 @@ namespace Atone {
 
     class ServicesManager {
         private:
-            std::map<std::string, Service&> services;
+            std::unordered_map<std::string, Service&> services;
 
         public:
-            ServicesManager();
-
             bool isRunning() const;
 
             void Add(const ServiceConfig &config);
