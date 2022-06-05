@@ -10,6 +10,7 @@
 #include "ServiceStatus.h"
 #include "exception/AtoneException.h"
 #include "logging/Log.h"
+#include "utils/time.h"
 
 namespace Atone {
 
@@ -21,14 +22,21 @@ namespace Atone {
     size_t Service::argc() const { return config.argc; }
     char **Service::argv() const { return config.argv; }
     std::vector<std::string> Service::dependsOn() const { return config.depends_on; }
-    ServiceRestartMode Service::Service::restartMode() const { return config.restart; }
+    ServiceRestartMode Service::restartMode() const { return config.restart; }
 
     ServiceStatus Service::status() const { return state.status; }
     bool Service::isRunning() const { return state.pid != 0; }
     pid_t Service::pid() const { return state.pid; }
     int Service::exitCode() const { return state.exit_code; }
 
+    /**
+     * Defines if the service can be restarted.
+     */
     bool Service::canRestart() const {
+        if (isRunning()) {
+            return false;
+        }
+
         switch (restartMode()) {
             case ServiceRestartMode::No:
                 return false;
@@ -45,15 +53,21 @@ namespace Atone {
         }
     }
 
+    /**
+     * Starts the service. If the service is already running,
+     * this method does nothing.
+     */
     void Service::Start() {
         auto service_name = config.name.c_str();
-
         Log::info("%s: starting service", service_name);
 
+        // check if the service and, eventually, its process are running
         if (CheckProcessState()) {
             Log::info("%s: service already running", service_name);
             return;
         }
+
+        // spawn process
 
         pid_t pid;
         auto argv = this->argv();
@@ -67,64 +81,72 @@ namespace Atone {
             throw;
         }
 
+        // update state
         state.pid = pid;
         state.status = ServiceStatus::Running;
 
         Log::info("%s: service started (PID=%i)", service_name, pid);
     }
 
-    bool Service::Stop(bool _kill) {
+    /**
+     * Stops the service. If the service is not running,
+     * this method does nothing.
+     * 
+     * @return Returns true if the service was stopped. Otherwise, false.
+     */
+    bool Service::Stop() {
         auto service_name = config.name.c_str();
-
         Log::info("%s: stopping service", service_name);
 
+        // check if the service and, eventually, its process are running
         if (!CheckProcessState()) {
             return true;
         }
 
+        // send the SIGTERM signal to the service process
         auto pid = state.pid;
-        auto signal = _kill ? SIGKILL : SIGTERM;
+        Log::trace("%s: sending signal to service process: %s", service_name, strsignal(SIGTERM));
+        Supervisor::SendSignal(pid, SIGTERM);
 
-        Log::trace("%s: sending signal to service process: %s", service_name, strsignal(signal));
+        // await for the process to exit
+        // TODO: define a timeout
+        timespec timeout = { 5, 0 };
+        timeout_from_now(timeout);
+        Supervisor::CheckForExitedProcess(pid, timeout);
 
-        Supervisor::SendSignal(pid, signal);
-
-        if (_kill) {
-            waitid(P_PID, pid, nullptr, WNOWAIT | WEXITED);
-        }
-
+        // checks the process state to reap it and update the service
         return !CheckProcessState();
     }
 
+    /**
+     * Checks if the process of the service is running. If the process is a
+     * zombie, it is reaped and the service status is updated.
+     * 
+     * @return Returns true if the process of the service is running,
+     *         otherwise false.
+     */
     bool Service::CheckProcessState() {
         auto service_name = config.name.c_str();
-
         Log::trace("%s: checking service process", service_name);
 
+        // checks if the service has a pid
         auto pid = state.pid;
-
         if (pid == 0) {
             Log::debug("%s: no process is assigned to the service", service_name);
             return false;
         }
 
-        int wstatus = 0;
-        auto result = waitpid(pid, &wstatus, WNOHANG);
+        // checks if the process is running
 
-        // on error, -1 is returned
-        if (result < 0) {
-            auto _errno = errno;
-            Log::crit("%s: service process wait failed: %s (PID=%i)", service_name, strerror(_errno), pid);
-            throw std::system_error(_errno, std::system_category(), "wait failed");
-        }
-        // one or more child(ren) specified by pid exist, but have not yet changed state, then 0 is returned
-        else if (result == 0) {
+        int wstatus = 0;
+        Supervisor::ReapZombieProcess(pid, &wstatus);
+
+        if (wstatus == 0) {
             Log::debug("%s: service process is running (PID=%i)", service_name, pid);
             return true;
         }
-        // on success, returns the process ID of the child whose state has changed
-        assert(result == pid);
 
+        // updates the service status to broken
         state.pid = 0;
         state.status = ServiceStatus::Broken;
 
@@ -133,7 +155,6 @@ namespace Atone {
         } else {
             Log::info("%s: service process terminated by signal (PID=%i, SIGNAL=%i)", service_name, pid, WTERMSIG(wstatus));
         }
-
         return false;
     }
 

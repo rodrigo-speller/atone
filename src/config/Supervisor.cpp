@@ -73,14 +73,14 @@ namespace Atone {
         Log::crit("unexpected signal received: %s", strsignal(signum));
     }
 
-    void Supervisor::ReapZombieProcess(pid_t pid) {
+    void Supervisor::ReapZombieProcess(pid_t pid, int *wstatus) {
         RequireInstance();
 
         Log::trace("reaping zombie process(es) (PID=%i)", pid);
 
         while (true) {
 
-            switch (auto wpid = waitpid(pid, NULL, WNOHANG)) {
+            switch (auto wpid = waitpid(pid, wstatus, WNOHANG)) {
                 // on error, -1 is returned
                 case -1: {
                     auto err = errno;
@@ -103,6 +103,7 @@ namespace Atone {
 
                 // on success, returns the process ID of the child whose state has changed
                 default: {
+                    assert(wpid > 0);
                     Log::info("zombie process reaped (PID=%i)", wpid);
                     break;
                 }
@@ -148,16 +149,15 @@ namespace Atone {
 
     /**
      * Check if any child process has exited.
+     * @param pid The pid of the child process to check, like pid paramenter on waitpid.
      * @return Returns the pid of the child process that has exited,
      *         or 0 if no child process has exited (but one or more child processes still running),
      *         or -1 if no child process is running.
      */
-    pid_t Supervisor::CheckForExitedProcess() {
-        siginfo_t siginfo;
+    pid_t Supervisor::CheckForExitedProcess(const pid_t pid) {
+        auto result = waitpid(-1, NULL, WNOWAIT | WNOHANG | WEXITED);
 
-        // WNOHANG: zero out the si_pid field before the call and check for a nonzero value in this field after the call
-        siginfo.si_pid = 0;
-        if (waitid(P_ALL, 0, &siginfo, WNOWAIT | WNOHANG | WEXITED) != 0) {
+        if (result < 0) {
             auto _errno = errno;
 
             if (_errno == ECHILD) {
@@ -168,9 +168,32 @@ namespace Atone {
             throw std::system_error(_errno, std::system_category(), "wait failed");
         }
 
-        auto pid = siginfo.si_pid;
-        assert(pid >= 0);
-        return pid;
+        return result;
+    }
+
+    /**
+     * Check if any child process has been exited until a timeout expires.
+     * @param pid The pid of the child process to check, like pid paramenter on waitpid.
+     * @param timeout The timeout.
+     * @return Returns the pid of the child process that has exited,
+     *         or 0 if no child process has exited (but one or more child processes still running),
+     *         or -1 if no child process is running.
+     */
+    pid_t Supervisor::CheckForExitedProcess(const pid_t pid, const timespec &timeout) {
+        while (true) {
+            auto result = CheckForExitedProcess(pid);
+
+            if (result == 0) {
+                if (timeout_expired(timeout)) {
+                    return 0;
+                }
+
+                std::this_thread::yield();
+                continue;
+            }
+
+            return result;
+        }
     }
 
     /**
@@ -201,7 +224,7 @@ namespace Atone {
      * @param info If the info argument is not NULL, then the buffer that it
      *             points to is used to return a structure of type siginfo_t
      *             containing information about the signal.
-     * @return Returns the signal number, or -1 if the call fail.
+     * @return Returns the signal number.
      */
     int Supervisor::WaitSignal(siginfo_t *info) {
         RequireInstance();
@@ -209,8 +232,8 @@ namespace Atone {
         int signum;
 
         if ((signum = sigwaitinfo(&instance->atoneSigset, info)) == -1) {
-            Log::crit("sigwait failed: %s", strerror(errno));
-            return -1;
+            auto err = errno;
+            throw system_error(errno, system_category(), string("sigwait failed: ") + strerror(err));
         }
 
         return signum;
@@ -224,7 +247,7 @@ namespace Atone {
      *             containing information about the signal.
      * @param timeout Specifies a minimum interval for which the thread is
      *                suspended waiting for a signal
-     * @return Returns the signal number, or 0 if the operation was timed-out, or -1 if the call fail.
+     * @return Returns the signal number, or 0 if the operation was timed-out.
      */
     int Supervisor::WaitSignal(siginfo_t *info, const timespec &timeout) {
         RequireInstance();
@@ -247,8 +270,7 @@ namespace Atone {
                 return 0;
             }
 
-            Log::crit("sigwait failed: %s", strerror(err));
-            return -1;
+            throw system_error(err, system_category(), string("sigwait failed: ") + strerror(err));
         }
 
         return signum;

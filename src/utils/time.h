@@ -7,7 +7,8 @@
 
 namespace Atone {
     int timeout_from_now(struct timespec &time);
-    
+    bool timeout_expired(const struct timespec &time);
+    int timespec_cmp(const struct timespec &a, const struct timespec &b);
     int timespec_add(const struct timespec &time1, const struct timespec &time2, struct timespec &result);
     int timespec_diff(const struct timespec &start, const struct timespec &stop, struct timespec &result);
 }

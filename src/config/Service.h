@@ -44,7 +44,7 @@ namespace Atone {
              * @return Returns true if the service is stopped or already is not running. Returns false if the service
              * process is still running, after the signal is sent.
              */
-            bool Stop(bool kill = false);
+            bool Stop();
 
             /**
              * Checks if the service process is running.
