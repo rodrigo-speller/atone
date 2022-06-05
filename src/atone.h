@@ -4,6 +4,10 @@
 #ifndef ATONE_H
 #define ATONE_H
 
+// namespaces
+
+using namespace std;
+
 // system libs
 
 #include <assert.h>
@@ -22,6 +26,7 @@
 #include <sys/wait.h>
 #include <syslog.h>
 #include <system_error>
+#include <thread>
 #include <time.h>
 #include <unistd.h>
 #include <vector>
