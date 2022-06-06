@@ -4,9 +4,9 @@
 #include "atone.h"
 
 #include "config/AtoneOptions.h"
-#include "config/Supervisor.h"
 #include "logging/Log.h"
 #include "programs/ProgramFactory.h"
+#include "system/Supervisor.h"
 
 int main(int argc, char **argv) {
 

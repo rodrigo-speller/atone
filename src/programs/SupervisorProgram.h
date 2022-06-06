@@ -7,7 +7,7 @@
 
 #include "config/AtoneOptions.h"
 #include "config/Context.h"
-#include "config/ServicesManager.h"
+#include "service/ServicesManager.h"
 
 namespace Atone {
     class SupervisorProgram: public ProgramBase {

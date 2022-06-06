@@ -5,11 +5,11 @@
 
 #include "Service.h"
 
-#include "config/Supervisor.h"
 #include "config/ServiceConfig.h"
-#include "config/ServiceStatus.h"
 #include "exception/AtoneException.h"
 #include "logging/Log.h"
+#include "service/ServiceStatus.h"
+#include "system/Supervisor.h"
 #include "utils/time.h"
 
 namespace Atone {

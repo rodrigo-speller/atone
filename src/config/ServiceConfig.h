@@ -5,7 +5,7 @@
 
 #include "atone.h"
 
-#include "ServiceRestartMode.h"
+#include "service/ServiceRestartMode.h"
 
 namespace Atone {
 

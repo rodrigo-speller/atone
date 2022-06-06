@@ -5,7 +5,7 @@
 
 #include "atone.h"
 
-#include "ServicesManager.h"
+#include "service/ServicesManager.h"
 
 namespace Atone {
 

@@ -9,7 +9,7 @@
 
 #include "config/Context.h"
 #include "config/ServiceConfig.h"
-#include "config/ServicesManager.h"
+#include "service/ServicesManager.h"
 
 namespace Atone {
     class YamlConfigParser {

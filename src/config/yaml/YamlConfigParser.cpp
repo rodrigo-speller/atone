@@ -6,10 +6,10 @@
 #include "YamlConfigParser.h"
 
 #include "config/Context.h"
-#include "config/Service.h"
 #include "config/ServiceConfig.h"
-#include "config/ServicesManager.h"
 #include "exception/AtoneException.h"
+#include "service/Service.h"
+#include "service/ServicesManager.h"
 
 namespace Atone {
     Context YamlConfigParser::ParseDocument(const std::string &configFile) {

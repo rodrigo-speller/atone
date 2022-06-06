@@ -7,11 +7,11 @@
 
 #include "config/AtoneOptions.h"
 #include "config/Context.h"
-#include "config/Service.h"
 #include "config/ServiceConfig.h"
-#include "config/ServicesManager.h"
 #include "config/yaml/YamlConfigParser.h"
 #include "exception/AtoneException.h"
+#include "service/Service.h"
+#include "service/ServicesManager.h"
 
 namespace Atone {
     Context::Context(const ServicesManager &services, const std::string &workdir)

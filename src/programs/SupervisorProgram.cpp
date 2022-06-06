@@ -8,8 +8,8 @@
 #include "exception/AtoneException.h"
 #include "config/AtoneOptions.h"
 #include "config/Context.h"
-#include "config/Supervisor.h"
 #include "logging/Log.h"
+#include "system/Supervisor.h"
 #include "utils/constants.h"
 #include "utils/time.h"
 

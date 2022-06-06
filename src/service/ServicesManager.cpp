@@ -5,9 +5,9 @@
 
 #include "ServicesManager.h"
 
-#include "config/Service.h"
 #include "exception/AtoneException.h"
 #include "logging/Log.h"
+#include "service/Service.h"
 
 namespace Atone {
     /**

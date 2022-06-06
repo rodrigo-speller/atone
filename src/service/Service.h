@@ -6,7 +6,7 @@
 #include "atone.h"
 
 #include "config/ServiceConfig.h"
-#include "config/ServiceStatus.h"
+#include "service/ServiceStatus.h"
 
 namespace Atone {
   /**

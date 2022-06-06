@@ -5,8 +5,8 @@
 
 #include "atone.h"
 
-#include "AtoneOptions.h"
-#include "Service.h"
+#include "config/AtoneOptions.h"
+#include "service/Service.h"
 
 namespace Atone {
 

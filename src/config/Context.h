@@ -6,7 +6,7 @@
 #include "atone.h"
 
 #include "config/AtoneOptions.h"
-#include "config/ServicesManager.h"
+#include "service/ServicesManager.h"
 
 namespace Atone {
     class Context {
