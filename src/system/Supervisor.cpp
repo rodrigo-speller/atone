@@ -126,14 +126,15 @@ namespace Atone {
 
             // release resources
 
+            // NOTE: Until that point, the child shares all memory with its
+            // parent, including the stack.
+
             // NOTE: A child process created via fork(2) inherits the process signal mask from the parent.
             // Before execve(2) we must restores sigprocmask.
 
             // NOTE: A child created via fork(2) inherits a copy of its parent's signal dispositions.
             // During an execve(2), the dispositions of handled signals are reset to the default;
             // the dispositions of ignored signals are left unchanged.
-
-            instance->Dispose();
 
             // execute
             execvp(argv[0], argv);
