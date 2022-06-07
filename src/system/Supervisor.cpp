@@ -155,7 +155,31 @@ namespace Atone {
      *         or -1 if no child process is running.
      */
     pid_t Supervisor::CheckForExitedProcess(const pid_t pid) {
-        auto result = waitpid(-1, NULL, WNOWAIT | WNOHANG | WEXITED);
+
+        // NOTE: simulates waitpid(2) behavior for pid value
+        id_t id;
+        idtype_t idtype;
+        switch (pid){
+        case -1:
+            idtype = P_ALL;
+            id = 0;
+            break;
+        case 0:
+            idtype = P_PGID;
+            id = getpgid(0);
+        default:
+            if (pid < 0) {
+                idtype = P_PGID;
+                id = -pid;
+            }
+            else {
+                idtype = P_PID;
+                id = pid;
+            }
+            break;
+        }
+
+        auto result = waitid(idtype, id, NULL, WNOWAIT | WNOHANG | WEXITED);
 
         if (result < 0) {
             auto _errno = errno;
