@@ -5,6 +5,10 @@
 
 #include "atone.h"
 
+namespace Atone {
+  class ServicesManager;
+}
+
 #include "config/AtoneOptions.h"
 #include "service/Service.h"
 
@@ -17,7 +21,8 @@ namespace Atone {
         public:
             bool isRunning() const;
 
-            void Add(const ServiceConfig &config);
+            void AddService(const ServiceConfig &config);
+            Service &GetService(const string &name) const;
             bool TryGetService(const pid_t pid, Service *&result) const;
             bool TryGetService(const std::string &name, Service *&result) const;
 

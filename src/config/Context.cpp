@@ -24,7 +24,7 @@ namespace Atone {
                 auto service_cfg = ServiceConfig(options.serviceName);
                 service_cfg.SetCommandArgs(options.commandArgc, options.commandArgv);
                 auto services = ServicesManager();
-                services.Add(service_cfg);
+                services.AddService(service_cfg);
 
                 return Context(services, 0);
             }

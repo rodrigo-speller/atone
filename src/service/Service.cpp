@@ -8,13 +8,14 @@
 #include "config/ServiceConfig.h"
 #include "exception/AtoneException.h"
 #include "logging/Log.h"
+#include "service/ServicesManager.h"
 #include "service/ServiceStatus.h"
 #include "system/Supervisor.h"
 #include "utils/time.h"
 
 namespace Atone {
-  Service::Service(const ServiceConfig &config)
-    : config(config) {
+  Service::Service(const ServicesManager &manager, const ServiceConfig &config)
+    : manager(manager), config(config) {
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -59,6 +60,43 @@ namespace Atone {
   //////////////////////////////////////////////////////////////////////
 
   void Service::Start() {
+    Start({});
+  }
+
+  void Service::Start(vector<Service*> callstack) {
+    find(callstack.begin(), callstack.end(), this) != callstack.end()
+      ? throw AtoneException("circular dependency")
+      : callstack.push_back(this);
+
+    // start dependencies
+
+    for (auto p_dependency : GetDependencies()) {
+      auto dependency = *p_dependency;
+      switch (dependency.status()) {
+        case ServiceStatus::Running:
+          break;
+        case ServiceStatus::NotStarted:
+            dependency.Start(callstack);
+            break;
+        case ServiceStatus::Stopped:
+        case ServiceStatus::Broken:
+          if (dependency.canRestart()) {
+            dependency.Start(callstack);
+          }
+          else {
+            throw domain_error("invalid dependency state");
+          }
+          break;
+        default:
+          throw domain_error("invalid dependency status");
+      }
+    }
+
+    // start process
+    Service::StartProcess();
+  }
+
+  void Service::StartProcess() {
     auto service_name = config.name.c_str();
     Log::info("%s: starting service", service_name);
 
@@ -165,5 +203,21 @@ namespace Atone {
       );
     }
     return false;
+  }
+
+  //////////////////////////////////////////////////////////////////////
+
+  vector<Service*> Service::GetDependencies() {
+    auto names = dependsOn();
+    vector<Service*> services(names.size());
+
+    auto &manager = this->manager;
+
+    for (auto &name : names) {
+      auto &service = manager.GetService(name);
+      services.push_back(&service);
+    }
+
+    return services;
   }
 }

@@ -51,7 +51,7 @@ namespace Atone {
         for (auto entry : services_node) {
             auto service_name = entry.first.as<std::string>();
             auto service = ParseService(service_name, entry.second);
-            manager.Add(service);
+            manager.AddService(service);
         }
 
         return manager;

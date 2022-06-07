@@ -29,9 +29,22 @@ namespace Atone {
      * Add a service to the manager.
      * @param config The service configuration.
      */
-    void ServicesManager::Add(const ServiceConfig &config) {
-        auto service = new Service(config);
+    void ServicesManager::AddService(const ServiceConfig &config) {
+        auto service = new Service(*this, config);
         services.insert({ service->name(), *service });
+    }
+
+    /**
+     * Get a service by name.
+     * @param name The service name.
+     * @return Returns the service.
+     */
+    Service &ServicesManager::GetService(const string &name) const {
+      Service *result = nullptr;
+      if (!TryGetService(name, result)) {
+        throw AtoneException("service not found");
+      }
+      return *result;
     }
 
     /**
@@ -76,15 +89,6 @@ namespace Atone {
     void ServicesManager::Start() {
         for (auto entry : services) {
             auto service = entry.second;
-
-            // start dependency services
-            auto dependency_names = service.dependsOn();
-            for (auto dependency_name : dependency_names) {
-                auto dependency_service = services.at(dependency_name);
-                // TODO: check if dependency service exists
-                dependency_service.Start();
-            }
-
             service.Start();
         }
     }

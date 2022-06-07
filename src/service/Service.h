@@ -5,7 +5,12 @@
 
 #include "atone.h"
 
+namespace Atone {
+  class Service;
+}
+
 #include "config/ServiceConfig.h"
+#include "service/ServicesManager.h"
 #include "service/ServiceStatus.h"
 
 namespace Atone {
@@ -32,11 +37,29 @@ namespace Atone {
       int exit_code;
     };
 
+    /** The service provider to resolve services dependencies. */
+    const ServicesManager &manager;
+
     /** The service configuration */
     const ServiceConfig config;
 
     /** The service execution state. */
     ServiceExecutionState state;
+
+    /** Private start method with callstack parameter to avoid cyclic calls. */
+    void Start(vector<Service*> callstack);
+
+    /**
+     * Starts the process of the service. If the service already has a
+     * running process, this method does nothing.
+     */
+    void StartProcess();
+
+    /**
+     * @brief Get the dependencies services of this service.
+     * @return Returns the dependencies instances of this service.
+     */
+    vector<Service*> GetDependencies();
 
   //////////////////////////////////////////////////////////////////////
 
@@ -45,7 +68,7 @@ namespace Atone {
      * Construct a new Service instance with the given configuration.
      * @param config Service configuration.
      */
-    Service(const ServiceConfig &config);
+    Service(const ServicesManager &manager, const ServiceConfig &config);
 
     ////////////////////////////////////////////////////////////////////
 
@@ -113,8 +136,8 @@ namespace Atone {
     bool canRestart() const;
 
     /**
-     * Starts the service. If the service is already running,
-     * this method does nothing.
+     * Starts the service, and all its dependencies if necessary.
+     * If the service is already running, this method does nothing.
      */
     void Start();
 
