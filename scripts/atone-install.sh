@@ -3,12 +3,12 @@
 # atone installation script
 #
 # How to use:
-#   curl -sSL https://github.com/rodrigo-speller/atone/releases/download/v0.0.3/atone-install.sh | bash /dev/stdin
+#   curl -sSL https://github.com/rodrigo-speller/atone/releases/download/v0.0.4/atone-install.sh | bash /dev/stdin
 #
 
 install() {
     ATONE_BASE_URL="https://github.com/rodrigo-speller/atone/releases/download"
-    DEBIAN_PACAKGE_URL="$ATONE_BASE_URL/v0.0.3/atone_0.0.3_amd64.deb"
+    DEBIAN_PACAKGE_URL="$ATONE_BASE_URL/v0.0.4/atone_0.0.4_amd64.deb"
     DEBIAN_PACKAGE_NAME=$(basename $DEBIAN_PACAKGE_URL)
     
     ATONE_TEMP=$(mktemp -d)
