@@ -52,7 +52,7 @@ namespace Atone {
         }
 
         // starts the services
-        services.Start();
+        services->Start();
     }
 
     /**
@@ -104,7 +104,7 @@ namespace Atone {
      * @param context Execution context.
      */
     void SupervisorProgram::Shutdown(Context &context) {
-        auto &services = context.services;
+        auto services = context.services;
 
         // TODO: define a timeout for stopping services and terminate all processes
         timespec timeout = { 5, 0 };
@@ -132,7 +132,7 @@ namespace Atone {
      * @return After all zombie processes is reaped, returns true if all child processes is terminated.
      *         And false, if any child process is still running.
      */
-    bool SupervisorProgram::ReapProcesses(ServicesManager &services, bool restart_services) {
+    bool SupervisorProgram::ReapProcesses(ServicesManager *services, bool restart_services) {
         Log::debug("reaping child processes");
 
         while (true) {
@@ -151,13 +151,13 @@ namespace Atone {
             Log::debug("child process exits (PID=%i)", pid);
 
             Service *service;
-            if (services.TryGetService(pid, service)) {
+            if (services->TryGetService(pid, service)) {
                 // service process
                 if (service->CheckProcessState())
                     throw AtoneException("invalid service process state");
 
                 if (restart_services)
-                    services.CheckService(*service);
+                    services->CheckService(service);
             }
             else {
                 // any other process
@@ -173,7 +173,7 @@ namespace Atone {
      *                After the timeout, all remaining child processes will be killed.
      * @return Returns true if all child processes was gracefully terminated, otherwise false.
      */
-    bool SupervisorProgram::TerminateAllProcess(ServicesManager &services, timespec timeout) {
+    bool SupervisorProgram::TerminateAllProcess(ServicesManager *services, timespec timeout) {
         Log::trace("terminating child process");
 
         // sends TERM signal to all process
@@ -241,16 +241,16 @@ namespace Atone {
      * @param services The services manager to collect the services.
      * @param timeout The timeout to wait for all services to stop.
      */
-    bool SupervisorProgram::StopAllServices(ServicesManager &services, timespec timeout) {
+    bool SupervisorProgram::StopAllServices(ServicesManager *services, timespec timeout) {
         Log::trace("stopping all services");
 
         // request to stop all services
-        if (services.Stop()) {
+        if (services->Stop()) {
             return true;
         }
         
         Log::trace("awaiting remaining services to stop");
-        while (services.isRunning()) {
+        while (services->isRunning()) {
             siginfo_t siginfo;
             auto signum = Supervisor::WaitSignal(&siginfo, timeout);
 

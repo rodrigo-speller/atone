@@ -11,10 +11,11 @@
 namespace Atone {
     class Context {
     public:
-        ServicesManager services;
-        const std::string &workdir;
+        ServicesManager *services;
+        const string workdir;
 
-        Context(const ServicesManager &services, const std::string &workdir);
+        Context();
+        Context(const string &workdir);
         static Context FromOptions(const AtoneOptions &options);
     };
 }

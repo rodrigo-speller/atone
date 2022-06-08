@@ -12,11 +12,10 @@ namespace Atone {
     class ServiceConfig {
         public:
             ServiceConfig(const std::string &name);
-            ~ServiceConfig();
 
             std::string name;
             size_t argc = 0;
-            char **argv = NULL;
+            shared_ptr<char *> argv = NULL;
             std::vector<std::string> depends_on;
             ServiceRestartMode restart = ServiceRestartMode::No;
 

@@ -38,7 +38,7 @@ namespace Atone {
     };
 
     /** The service provider to resolve services dependencies. */
-    const ServicesManager &manager;
+    const ServicesManager *manager;
 
     /** The service configuration */
     const ServiceConfig config;
@@ -68,7 +68,7 @@ namespace Atone {
      * Construct a new Service instance with the given configuration.
      * @param config Service configuration.
      */
-    Service(const ServicesManager &manager, const ServiceConfig &config);
+    Service(const ServicesManager *manager, const ServiceConfig &config);
 
     ////////////////////////////////////////////////////////////////////
 
@@ -88,7 +88,7 @@ namespace Atone {
      * Gets the service command arguments.
      * @return The service command arguments.
      */
-    char **argv() const;
+    shared_ptr<char *> argv() const;
 
     /**
      * Gets the service dependencies.

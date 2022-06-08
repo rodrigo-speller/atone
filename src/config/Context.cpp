@@ -12,10 +12,15 @@
 #include "exception/AtoneException.h"
 #include "service/Service.h"
 #include "service/ServicesManager.h"
+#include "logging/Log.h"
 
 namespace Atone {
-    Context::Context(const ServicesManager &services, const std::string &workdir)
-        : services(services), workdir(workdir) {
+    Context::Context()
+      : Context(string()) {
+    }
+
+    Context::Context(const std::string &workdir)
+        : services(new ServicesManager()), workdir(workdir) {
     }
 
     Context Context::FromOptions(const AtoneOptions &options) {
@@ -23,10 +28,10 @@ namespace Atone {
             case AtoneMode::SingleService: {
                 auto service_cfg = ServiceConfig(options.serviceName);
                 service_cfg.SetCommandArgs(options.commandArgc, options.commandArgv);
-                auto services = ServicesManager();
-                services.AddService(service_cfg);
 
-                return Context(services, 0);
+                Context context;
+                context.services->AddService(service_cfg);
+                return context;
             }
 
             case AtoneMode::MultiServices: {

@@ -28,15 +28,20 @@ namespace Atone {
             auto workdir_node = settings_node["workdir"];
 
             if (workdir_node.Type() == YAML::NodeType::Scalar) {
-                workdir = basepath + workdir_node.as<std::string>();
+                workdir = basepath + "/" + workdir_node.as<std::string>();
             }
         }
 
+        auto context = Context(workdir);
         auto services = ParseServices(document);
-        return Context(services, workdir);
+        for (auto service : services) {
+            context.services->AddService(service);
+        }
+
+        return context;
     }
     
-    ServicesManager YamlConfigParser::ParseServices(const YAML::Node &document) {
+    list<ServiceConfig> YamlConfigParser::ParseServices(const YAML::Node &document) {
         const auto services_node = document["services"];
 
         if (!services_node) {
@@ -47,14 +52,14 @@ namespace Atone {
             throw std::domain_error("invalid services section value");
         }
 
-        auto manager = ServicesManager();
+        list<ServiceConfig> services;
         for (auto entry : services_node) {
             auto service_name = entry.first.as<std::string>();
             auto service = ParseService(service_name, entry.second);
-            manager.AddService(service);
+            services.push_back(service);
         }
 
-        return manager;
+        return services;
     }
 
     ServiceConfig YamlConfigParser::ParseService(const std::string &name, const YAML::Node &config) {

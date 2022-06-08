@@ -16,20 +16,20 @@ namespace Atone {
 
     class ServicesManager {
         private:
-            std::unordered_map<std::string, Service&> services;
+            std::unordered_map<std::string, Service*> services;
 
         public:
             bool isRunning() const;
 
             void AddService(const ServiceConfig &config);
-            Service &GetService(const string &name) const;
+            Service *GetService(const string &name) const;
             bool TryGetService(const pid_t pid, Service *&result) const;
             bool TryGetService(const std::string &name, Service *&result) const;
 
             void Start();
             bool Stop();
             bool CheckAllServices() const;
-            bool CheckService(Service &service) const;
+            bool CheckService(Service *service) const;
     };
 
 }

@@ -18,7 +18,7 @@ namespace Atone {
         for (auto entry : services) {
             auto service = entry.second;
 
-            if (service.isRunning())
+            if (service->isRunning())
                 return true;
         }
 
@@ -30,8 +30,8 @@ namespace Atone {
      * @param config The service configuration.
      */
     void ServicesManager::AddService(const ServiceConfig &config) {
-        auto service = new Service(*this, config);
-        services.insert({ service->name(), *service });
+        auto service = new Service(this, config);
+        services.insert({ service->name(), service });
     }
 
     /**
@@ -39,12 +39,13 @@ namespace Atone {
      * @param name The service name.
      * @return Returns the service.
      */
-    Service &ServicesManager::GetService(const string &name) const {
+    Service *ServicesManager::GetService(const string &name) const {
       Service *result = nullptr;
       if (!TryGetService(name, result)) {
-        throw AtoneException("service not found");
+        throw AtoneException("service not found: " + name);
       }
-      return *result;
+
+      return result;
     }
 
     /**
@@ -53,13 +54,12 @@ namespace Atone {
      * @param result The service.
      * @return Returns true if the service was found, otherwise false.
      */
-    bool ServicesManager::TryGetService(const pid_t pid, Service *&result) const {
+    bool ServicesManager::TryGetService(const pid_t pid, Service *&result) const {      
         for (auto entry : services) {
             auto service = entry.second;
 
-            if (service.pid() == pid) {
-                if (result)
-                    result = &service;
+            if (service->pid() == pid) {
+                result = service;
                 return true;
             }
         }
@@ -76,8 +76,7 @@ namespace Atone {
         auto entry = services.find(name);
 
         if (entry != services.end()) {
-            if (result)
-                result = &entry->second;
+            result = entry->second;
             return true;
         }
         return false;
@@ -89,7 +88,7 @@ namespace Atone {
     void ServicesManager::Start() {
         for (auto entry : services) {
             auto service = entry.second;
-            service.Start();
+            service->Start();
         }
     }
 
@@ -105,7 +104,7 @@ namespace Atone {
 
         for (auto entry : services) {
             auto service = entry.second;
-            success &= service.Stop();
+            success &= service->Stop();
         }
 
         return success;
@@ -134,20 +133,20 @@ namespace Atone {
      * @return Returns true if the service is running.
      *         Otherwise, if the service is not running, returns false.
      */
-    bool ServicesManager::CheckService(Service &service) const {
-        auto service_name = service.name().c_str();
+    bool ServicesManager::CheckService(Service *service) const {
+        auto service_name = service->name().c_str();
 
         Log::trace("%s: checking service", service_name);
 
-        if (service.isRunning()) {
+        if (service->isRunning()) {
             Log::debug("%s: service is running", service_name);
             return true;
         }
 
-        if (service.canRestart()) {
+        if (service->canRestart()) {
             Log::debug("%s: service must be restarted", service_name);
 
-            service.Start();
+            service->Start();
             return true;
         }
 

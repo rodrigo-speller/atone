@@ -16,7 +16,7 @@ namespace Atone {
     public:
         Context ParseDocument(const std::string &path);
         Context ParseDocument(const YAML::Node &document, const std::string &basepath);
-        ServicesManager ParseServices(const YAML::Node &document);
+        list<ServiceConfig> ParseServices(const YAML::Node &document);
         ServiceConfig ParseService(const std::string &name, const YAML::Node &node);
 
         void SetCommandArgs(ServiceConfig &target, const YAML::Node &command);

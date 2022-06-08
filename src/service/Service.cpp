@@ -14,7 +14,7 @@
 #include "utils/time.h"
 
 namespace Atone {
-  Service::Service(const ServicesManager &manager, const ServiceConfig &config)
+  Service::Service(const ServicesManager *manager, const ServiceConfig &config)
     : manager(manager), config(config) {
   }
 
@@ -22,7 +22,7 @@ namespace Atone {
 
   string Service::name() const { return config.name; }
   size_t Service::argc() const { return config.argc; }
-  char **Service::argv() const { return config.argv; }
+  shared_ptr<char *> Service::argv() const { return config.argv; }
   vector<string> Service::dependsOn() const { return config.depends_on; }
   ServiceRestartMode Service::restartMode() const { return config.restart; }
 
@@ -69,19 +69,17 @@ namespace Atone {
       : callstack.push_back(this);
 
     // start dependencies
-
-    for (auto p_dependency : GetDependencies()) {
-      auto dependency = *p_dependency;
-      switch (dependency.status()) {
+    for (auto dependency : GetDependencies()) {
+      switch (dependency->status()) {
         case ServiceStatus::Running:
           break;
         case ServiceStatus::NotStarted:
-            dependency.Start(callstack);
+            dependency->Start(callstack);
             break;
         case ServiceStatus::Stopped:
         case ServiceStatus::Broken:
-          if (dependency.canRestart()) {
-            dependency.Start(callstack);
+          if (dependency->canRestart()) {
+            dependency->Start(callstack);
           }
           else {
             throw domain_error("invalid dependency state");
@@ -112,7 +110,7 @@ namespace Atone {
     auto argv = this->argv();
     Log::debug("%s: spawning service", service_name);
     try {
-      pid = Supervisor::Spawn(argv);
+      pid = Supervisor::Spawn(argv.get());
     }
     catch (...) {
       Log::error("%s: failed to spawn service", service_name);
@@ -209,13 +207,11 @@ namespace Atone {
 
   vector<Service*> Service::GetDependencies() {
     auto names = dependsOn();
-    vector<Service*> services(names.size());
-
-    auto &manager = this->manager;
+    vector<Service*> services;
 
     for (auto &name : names) {
-      auto &service = manager.GetService(name);
-      services.push_back(&service);
+      auto service = manager->GetService(name);
+      services.push_back(service);
     }
 
     return services;
