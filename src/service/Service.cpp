@@ -123,7 +123,7 @@ namespace Atone {
     state.status = ServiceStatus::Running;
     state.exit_code = 0;
 
-    Log::info("%s: service started (PID=%i)", service_name, pid);
+    Log::notice("%s: service started (PID=%i)", service_name, pid);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -188,13 +188,13 @@ namespace Atone {
 
     if (WIFEXITED(wstatus)) {
       state.exit_code = WEXITSTATUS(wstatus);
-      Log::info(
+      Log::notice(
         "%s: service process exits (PID=%i, EXITCODE=%i)",
         service_name, pid, WEXITSTATUS(wstatus)
       );
     } else {
       state.exit_code = -1;
-      Log::info(
+      Log::notice(
         "%s: service process terminated by signal (PID=%i, SIGNAL=%i)",
         service_name, pid, WTERMSIG(wstatus)
       );

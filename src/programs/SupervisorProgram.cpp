@@ -76,7 +76,7 @@ namespace Atone {
                 case SIGQUIT:
                 // terminate process
                 case SIGTERM: {
-                    Log::debug("signal received: %s", strsignal(signum));
+                    Log::notice("signal received: %s", strsignal(signum));
                     return;
                 }
                 // child process exited
@@ -140,7 +140,7 @@ namespace Atone {
 
             switch (pid) {
                 case -1:
-                    Log::debug("no more child process");
+                    Log::notice("no child process is running");
                     return true;
                 case 0:
                     // no process exits, but one or more child processes still running

@@ -129,7 +129,7 @@ namespace Atone {
                 // on success, returns the process ID of the child whose state has changed
                 default: {
                     assert(wpid > 0);
-                    Log::info("zombie process reaped (PID=%i)", wpid);
+                    Log::debug("zombie process reaped (PID=%i)", wpid);
 
                     if (status != nullptr) {
                         *status = wstatus;
@@ -226,7 +226,7 @@ namespace Atone {
             auto _errno = errno;
 
             if (_errno == ECHILD) {
-                Log::notice("no child process is running");
+                Log::debug("no child process is running");
                 return -1;
             }
 
