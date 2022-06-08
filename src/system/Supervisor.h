@@ -29,7 +29,7 @@ namespace Atone {
             static void Initialize();
             static void Dispose();
 
-            static void ReapZombieProcess(const pid_t pid = -1, int *wstatus = nullptr);
+            static bool ReapZombieProcess(const pid_t pid = -1, int *wstatus = nullptr);
             static pid_t Spawn(char *const argv[]);
             static pid_t CheckForExitedProcess(const pid_t pid = -1);
             static pid_t CheckForExitedProcess(const pid_t pid, const timespec &timeout);

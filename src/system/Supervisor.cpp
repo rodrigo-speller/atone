@@ -73,14 +73,35 @@ namespace Atone {
         Log::crit("unexpected signal received: %s", strsignal(signum));
     }
 
-    void Supervisor::ReapZombieProcess(pid_t pid, int *wstatus) {
+    /**
+     * Reaps zombie processes.
+     * @param pid Process ID to reap. The semantics of pid are the same
+     *            as waitpid.
+     *            If less than -1, reap any zombie process that group ID
+     *            is equal to the absolute value of pid.
+     *            If pid is -1, reap all zombie processes.
+     *            If pid is 0, reap all zombie processes that group ID
+     *            is equal to the process group ID of the calling
+     *            process.
+     *            If pid is greater than 0, reap the zombie process with
+     *            process ID equals to pid.
+     * @param wstatus Pointer to a status variable to store the exit
+     *                status of the last reaped process. The semantics
+     *                of status are the same as waitpid.
+     *                If status is NULL, the exit status is not stored.
+     * @return Returns true, if any process was reaped, or no process
+     *         matches pid's criteria. Returns false, if one or more
+     *         processes matches pid's criteria, but have not yet
+     *         changed to be reaped.
+     */
+    bool Supervisor::ReapZombieProcess(pid_t pid, int *status) {
         RequireInstance();
 
         Log::trace("reaping zombie process(es) (PID=%i)", pid);
 
         while (true) {
-
-            switch (auto wpid = waitpid(pid, wstatus, WNOHANG)) {
+            int wstatus;
+            switch (auto wpid = waitpid(pid, &wstatus, WNOHANG)) {
                 // on error, -1 is returned
                 case -1: {
                     auto err = errno;
@@ -88,23 +109,31 @@ namespace Atone {
                     // avoid warning "No child processes"
                     if (err == ECHILD) {
                         Log::debug("no zombie process to reap");
-                        return;
+                        return true;
                     }
 
-                    Log::warn("zombie process reaping failed: %s", strerror(err));
-                    return;
+                    throw std::runtime_error(std::string("waitpid failed: ") + strerror(err));
                 }
 
                 // one or more child(ren) specified by pid exist, but have not yet changed state, then 0 is returned
                 case 0: {
                     Log::debug("no zombie process to reap, but has one or more running children");
-                    return;
+                    return false;
                 }
 
                 // on success, returns the process ID of the child whose state has changed
                 default: {
                     assert(wpid > 0);
                     Log::info("zombie process reaped (PID=%i)", wpid);
+
+                    if (status != nullptr) {
+                        *status = wstatus;
+                    }
+
+                    if (wpid == pid) {
+                        return true;
+                    }
+
                     break;
                 }
             }

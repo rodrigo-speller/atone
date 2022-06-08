@@ -173,9 +173,8 @@ namespace Atone {
     // checks if the process is running
 
     int wstatus = 0;
-    Supervisor::ReapZombieProcess(pid, &wstatus);
 
-    if (wstatus == 0) {
+    if (!Supervisor::ReapZombieProcess(pid, &wstatus)) {
       // process is running
       Log::debug("%s: service process is running (PID=%i)", service_name, pid);
       return true;
