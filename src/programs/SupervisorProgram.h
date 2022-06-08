@@ -14,7 +14,7 @@ namespace Atone {
     private:
         void Bootstrap(Context &context);
         void MainLoop(Context &context);
-        void Shutdown(Context &context);
+        bool Shutdown(Context &context);
 
         bool ReapProcesses(ServicesManager *services, bool restart = false);
         bool TerminateAllProcess(ServicesManager *services, timespec timeout);

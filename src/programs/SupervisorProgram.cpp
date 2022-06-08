@@ -20,6 +20,8 @@ namespace Atone {
 
     int SupervisorProgram::Run() {
         auto pid = getpid();
+        bool exitcode = EXIT_SUCCESS;
+
         Log::info("starting supervisor... (PID=%i)", pid);
 
         // atone supervisor must be executed as an init process (pid = 1)
@@ -33,10 +35,12 @@ namespace Atone {
 
         Bootstrap(context);
         MainLoop(context);
-        Shutdown(context);
+        if (!Shutdown(context)) {
+            exitcode = EXIT_FAILURE;
+        }
 
         Log::info("exit supervisor (PID=%i)", getpid());
-        return 0;
+        return exitcode;
     }
 
     /**
@@ -103,7 +107,8 @@ namespace Atone {
      * Supervisor shutdown.
      * @param context Execution context.
      */
-    void SupervisorProgram::Shutdown(Context &context) {
+    bool SupervisorProgram::Shutdown(Context &context) {
+        bool success = true;
         auto services = context.services;
 
         // TODO: define a timeout for stopping services and terminate all processes
@@ -116,12 +121,14 @@ namespace Atone {
 
         // terminate remaining processes
         if (!TerminateAllProcess(services, timeout)) {
-            // TODO: define exit code for this case
+            Log::crit("failed on terminate all processes");
+            success = false;
         }
 
         // at this point, all processes are terminated (or killed)
         // them reap any remaining zombie processes
         Supervisor::ReapZombieProcess();
+        return success;
     }
 
     /**

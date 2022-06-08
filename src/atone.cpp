@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
 
     using namespace Atone;
 
-    int exitCode = EXIT_FAILURE;
+    int exitcode = EXIT_FAILURE;
 
     // GLOBAL EXCEPTION HANDLING
     try {
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
         Log::set(options.loggerFactory(options));
         Supervisor::Initialize();
 
-        exitCode = ProgramFactory::CreateProgram(options)->Run();
+        exitcode = ProgramFactory::CreateProgram(options)->Run();
 
         // shutdown
         Supervisor::Dispose();
@@ -54,5 +54,5 @@ int main(int argc, char **argv) {
         std::cerr << "Caught unknown exception: " << name << std::endl;
     }
 
-    return exitCode;
+    return exitcode;
 }
