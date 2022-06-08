@@ -33,6 +33,11 @@ namespace Atone {
     }
 
     Supervisor::~Supervisor() {
+        // removes the unexpected signal handler
+        for (int i = 1; i <= 31; i++) {
+            signal(i, nullptr);
+        }
+
         // restores the signals blocked by Atone
         if (sigprocmask(SIG_SETMASK, &spawnSigset, nullptr)) {
             Log::crit("sigprocmask failed: %s", strerror(errno));
@@ -70,7 +75,7 @@ namespace Atone {
     }
 
     void Supervisor::UnexpectedSignalHandler(int signum) {
-        Log::crit("unexpected signal received: %s", strsignal(signum));
+        Log::crit("unexpected signal received: %s (%d)", strsignal(signum), signum);
     }
 
     /**
@@ -161,6 +166,11 @@ namespace Atone {
             // NOTE: A child process created via fork(2) inherits the process signal mask from the parent.
             // Before execve(2) we must restores sigprocmask.
 
+            // restores the signals blocked by atone
+            if (sigprocmask(SIG_SETMASK, &instance->spawnSigset, nullptr)) {
+                exit(EXIT_FAILURE);
+            };
+
             // NOTE: A child created via fork(2) inherits a copy of its parent's signal dispositions.
             // During an execve(2), the dispositions of handled signals are reset to the default;
             // the dispositions of ignored signals are left unchanged.
@@ -209,7 +219,8 @@ namespace Atone {
             break;
         }
 
-        auto result = waitid(idtype, id, NULL, WNOWAIT | WNOHANG | WEXITED);
+        siginfo_t siginfo;
+        auto result = waitid(idtype, id, &siginfo, WNOWAIT | WNOHANG | WEXITED);
 
         if (result < 0) {
             auto _errno = errno;
@@ -222,7 +233,7 @@ namespace Atone {
             throw std::system_error(_errno, std::system_category(), "wait failed");
         }
 
-        return result;
+        return siginfo.si_pid;
     }
 
     /**
