@@ -22,6 +22,11 @@ namespace Atone {
         auto pid = getpid();
         bool exitcode = EXIT_SUCCESS;
 
+        // setup
+
+        Log::set(options.loggerFactory(options));
+        Supervisor::Initialize();
+
         Log::info("starting supervisor... (PID=%i)", pid);
 
         // atone supervisor must be executed as an init process (pid = 1)
@@ -40,6 +45,12 @@ namespace Atone {
         }
 
         Log::info("exit supervisor (PID=%i)", getpid());
+
+        // exit
+
+        Supervisor::Dispose();
+        Log::set(nullptr);
+
         return exitcode;
     }
 

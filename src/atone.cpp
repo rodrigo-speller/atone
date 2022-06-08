@@ -16,20 +16,10 @@ int main(int argc, char **argv) {
 
     // GLOBAL EXCEPTION HANDLING
     try {
-        // parse args
-
         const auto options = AtoneOptions::FromArgs(argc, argv);
+        const auto program = ProgramFactory::CreateProgram(options);
 
-        // setup
-
-        Log::set(options.loggerFactory(options));
-        Supervisor::Initialize();
-
-        exitcode = ProgramFactory::CreateProgram(options)->Run();
-
-        // shutdown
-        Supervisor::Dispose();
-        Log::set(nullptr);
+        exitcode = program->Run();
     }
     catch (char const *message) {
         Log::fatal(message);
