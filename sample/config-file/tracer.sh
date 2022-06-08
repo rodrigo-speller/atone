@@ -6,7 +6,7 @@ trap_signals () {
     func="$1" ; shift
 
     for sig ; do
-        trap "$func $sig" "$sig"
+        trap "$func" "$sig"
     done
 }
 
