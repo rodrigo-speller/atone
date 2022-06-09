@@ -1,0 +1,5 @@
+settings:
+  workdir: /
+
+services:
+  sleep-5: sleep 5

@@ -23,10 +23,11 @@ trap_signals signal_handler INT TERM HUP KILL
 while true; do
 
     sleep 1
-    [ $_terminated -eq 1 ] && exit 0
-    if [ $PPID -ne `ps -ho ppid $$ | xargs` ]; then
-        echo "Parent process killed"
+    [ $_terminated -eq 1 ] && {
+        bash -c "while true; do sleep 1; done" &
+        echo $!
+        ps
         exit 0
-    fi
+    }
 
 done
