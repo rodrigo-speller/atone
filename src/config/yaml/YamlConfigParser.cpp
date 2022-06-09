@@ -24,7 +24,7 @@ namespace Atone {
         auto settings_node = document["settings"];
         std::string workdir;
 
-        if (settings_node.Type() == YAML::NodeType::Map) {
+        if (settings_node && settings_node.Type() == YAML::NodeType::Map) {
             auto workdir_node = settings_node["workdir"];
 
             if (workdir_node.Type() == YAML::NodeType::Scalar) {
