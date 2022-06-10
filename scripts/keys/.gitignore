@@ -1,0 +1,8 @@
+# ignore all file
+*
+
+# accept git ignore file
+!.gitignore
+
+# accept public files
+!*.pub

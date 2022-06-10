@@ -1,0 +1,9 @@
+Package: atone
+Version: ${ATONE_BUILD_VERSION}
+Architecture: amd64
+Maintainer: Rodrigo Speller <rodrigo@speller.com.br>
+Description: Atone is a Linux init-like process supervisor.
+ Atone is a tool for defining, running and monitoring
+ single/multi-service Linux containers processes. With Atone, you can
+ use a YAML file to configure your container's services. Then, with a
+ single command, you start all the services from your configuration.
