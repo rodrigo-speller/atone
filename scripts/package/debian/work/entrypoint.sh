@@ -37,7 +37,7 @@ package() {
   cp "$builddir/build/release/bin/atone" "$pkgdir/sbin"
 
   mkdir -p "$startdir/repo" 
-  fakeroot dpkg-deb --build "$pkgdir" "$startdir/repo/atone_${ATONE_BUILD_VERSION}_amd64.deb"
+  fakeroot dpkg-deb --build "$pkgdir" "$startdir/repo/atone_${ATONE_BUILD_VERSION}_${DEBIAN_PACKAGE_ARCH}.deb"
 }
 
 download() {

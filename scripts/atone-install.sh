@@ -28,7 +28,17 @@ install() {
 }
 
 install_debian() {
-    DEBIAN_PACAKGE_URL="${ATONE_BASE_URL}/atone_${ATONE_VERSION}_amd64.deb"
+    DEBIAN_PACKAGE_ARCH=$(uname -m)
+    case $DEBIAN_PACKAGE_ARCH in
+        x86_64)
+            DEBIAN_PACKAGE_ARCH=amd64
+            ;;
+        armv7l)
+            DEBIAN_PACKAGE_ARCH=armhf
+            ;;
+    esac
+
+    DEBIAN_PACAKGE_URL="${ATONE_BASE_URL}/atone_${ATONE_VERSION}_${DEBIAN_PACKAGE_ARCH}.deb"
     DEBIAN_PACKAGE_NAME=$(basename $DEBIAN_PACAKGE_URL)
     DEBIAN_PACKAGE_FILE="$ATONE_TEMP/$DEBIAN_PACKAGE_NAME"
 
@@ -38,7 +48,14 @@ install_debian() {
 }
 
 install_alpine() {
-    ALPINE_PACAKGE_URL="${ATONE_BASE_URL}/atone-${ATONE_VERSION}-r0-x86_64.apk"
+    ALPINE_PACKAGE_ARCH=$(uname -m)
+    case $ALPINE_PACKAGE_ARCH in
+        armv7l)
+            ALPINE_PACKAGE_ARCH=armv7
+            ;;
+    esac
+
+    ALPINE_PACAKGE_URL="${ATONE_BASE_URL}/atone-${ATONE_VERSION}-r0-${ALPINE_PACKAGE_ARCH}.apk"
     ALPINE_PACKAGE_NAME=$(basename $ALPINE_PACAKGE_URL)
     ALPINE_PACKAGE_FILE="$ATONE_TEMP/$ALPINE_PACKAGE_NAME"
 
