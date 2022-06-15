@@ -9,7 +9,7 @@
 set -e
 
 install() {
-    ATONE_VERSION=0.0.4
+    ATONE_VERSION=0.0.5
     ATONE_BASE_URL="https://github.com/rodrigo-speller/atone/releases/download/v${ATONE_VERSION}"
     
     ATONE_TEMP=$(mktemp -d)
