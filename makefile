@@ -2,7 +2,7 @@
 
 all: atone
 atone: build
-build: before-build build-core after-build
+build: before-build 3rd-party build-core after-build
 rebuild: clean build
 
 .PHONY: clean build rebuild atone
@@ -14,8 +14,8 @@ PRECOMPILE+=src/atone.h
 LIBRARY+=optparse
 LIBRARY+=yaml-cpp
 
-LIBRARY_PATH+=3rd-party/optparse/lib
-LIBRARY_PATH+=3rd-party/yaml-cpp/lib
+LIBRARY_PATH+=3rd-party/optparse/build/$(TARGET)/bin
+LIBRARY_PATH+=3rd-party/yaml-cpp/build/$(TARGET)/bin
 
 INCLUDE_PATH+=$(SRCDIR)
 INCLUDE_PATH+=3rd-party/optparse/include
@@ -111,6 +111,20 @@ $(PCHS): $(PCHDIR)/%.gch: %
 after-build:
 	@echo "Build completed"
 
+# 3rd-party
+
+3rd-party: \
+  3rd-party/optparse/build/$(TARGET)/bin/liboptparse.a \
+  3rd-party/yaml-cpp/build/$(TARGET)/bin/libyaml-cpp.a
+
+3rd-party/optparse/build/$(TARGET)/bin/liboptparse.a:
+	@echo "Building optparse"
+	@$(MAKE) -C 3rd-party/optparse
+
+3rd-party/yaml-cpp/build/$(TARGET)/bin/libyaml-cpp.a:
+	@echo "Building yaml-cpp"
+	@$(MAKE) -C 3rd-party/yaml-cpp
+
 # CLEAN
 
 clean:
@@ -118,6 +132,8 @@ clean:
 
 clean-all:
 	@-rm -rv -- $(BUILDDIR) || true
+	@$(MAKE) -C 3rd-party/optparse clean-all
+	@$(MAKE) -C 3rd-party/yaml-cpp clean-all
 
 $(TARGETDIR)/.marker: makefile
 	@-mkdir -p $(TARGETDIR)

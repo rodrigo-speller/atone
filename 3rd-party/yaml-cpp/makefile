@@ -1,12 +1,11 @@
 # project targets
 
-all: yaml-cpp
-yaml-cpp: build
+all: libyaml-cpp
+libyaml-cpp: build
 build: before-build build-core after-build
 rebuild: clean build
-install: before-install install-core after-install
 
-.PHONY: clean build rebuild yaml-cpp
+.PHONY: clean build rebuild libyaml-cpp
 
 # project configuration
 
@@ -23,7 +22,6 @@ CXXFLAGS+=-MMD
 # default directories
 
 SRCDIR?=src
-INSTALLDIR?=lib
 BUILDDIR?=build
 TARGETDIR?=$(BUILDDIR)/$(TARGET)
 OUTDIR?=$(TARGETDIR)/bin
@@ -71,11 +69,11 @@ before-build:
 	@echo "  Output directory: $(OUTDIR)"
 	@-mkdir -p $(OUTDIR) $(dir $(OBJECTS))
 
-build-core: $(OUTDIR)/yaml-cpp.a
+build-core: $(OUTDIR)/libyaml-cpp.a
 
-$(OUTDIR)/yaml-cpp.a: $(OBJECTS)
+$(OUTDIR)/libyaml-cpp.a: $(OBJECTS)
 	@echo "  Creating library $@"
-	@$(AR) $(ARFLAGS) $(OUTDIR)/yaml-cpp.a $(OBJECTS)
+	@$(AR) $(ARFLAGS) $(OUTDIR)/libyaml-cpp.a $(OBJECTS)
 
 $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 	@echo "  Compiling $<"
@@ -83,20 +81,6 @@ $(OBJECTS): $(OBJDIR)/%.o: %.cpp
 
 after-build:
 	@echo "Build completed"
-
-# INSTALL
-
-before-install: build
-	@echo "Installing..."
-
-install-core: $(INSTALLDIR)/libyaml-cpp.a
-
-$(INSTALLDIR)/libyaml-cpp.a: $(OUTDIR)/yaml-cpp.a
-	@cp $< $@
-	@echo "  $@"
-
-after-install:
-	@echo "Installation completed"
 
 #CLEAN
 
