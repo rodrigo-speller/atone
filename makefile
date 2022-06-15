@@ -120,6 +120,7 @@ clean-all:
 	@-rm -rv -- $(BUILDDIR) || true
 
 $(TARGETDIR)/.marker: makefile
+	@-mkdir -p $(TARGETDIR)
 	@touch $@
 	$(MAKE) clean
 
