@@ -25,10 +25,6 @@ int main(int argc, char **argv) {
         Log::fatal(message);
         std::cerr << "Caught exception: " << message << std::endl;
     }
-    catch (const char *message) {
-        Log::fatal(message);
-        std::cerr << "Caught exception: " << message << std::endl;
-    }
     catch (const std::string ex) {
         auto message = ex.c_str();
         Log::fatal(message);
