@@ -179,8 +179,8 @@ namespace Atone {
             execvp(argv[0], argv);
 
             // execution must not return, except on error
-            Log::crit("service exec failed", strerror(errno));
-            exit(EXIT_FAILURE);
+            Log::crit("service exec failed: %s", strerror(errno));
+            _exit(EXIT_FAILURE);
 
         }
 
