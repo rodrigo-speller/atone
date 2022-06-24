@@ -36,6 +36,9 @@ install_debian() {
         armv7l)
             DEBIAN_PACKAGE_ARCH=armhf
             ;;
+        aarch64)
+          DEBIAN_PACKAGE_ARCH=arm64
+          ;;
     esac
 
     DEBIAN_PACAKGE_URL="${ATONE_BASE_URL}/atone_${ATONE_VERSION}_${DEBIAN_PACKAGE_ARCH}.deb"

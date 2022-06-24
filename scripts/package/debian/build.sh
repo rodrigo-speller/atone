@@ -16,6 +16,9 @@ case $DEBIAN_PACKAGE_ARCH in
     armv7l)
         DEBIAN_PACKAGE_ARCH=armhf
         ;;
+    aarch64)
+        DEBIAN_PACKAGE_ARCH=arm64
+        ;;
 esac
 
 # variables
