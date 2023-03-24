@@ -22,9 +22,9 @@ To learn more about all the features of Atone, see the list of features.
 
 # How to install and use
 
-To install Atone, you must to download a specific version from the [releases page](https://github.com/rodrigo-speller/atone/releases).
+To install Atone, you must execute the *install script* or download a specific version from the [releases page](https://github.com/rodrigo-speller/atone/releases).
 
-Or execute the following command to install the latest version:
+To install the latest version, execute the following command:
 
 ```sh
 curl -sSL https://github.com/rodrigo-speller/atone/releases/download/latest/atone-install.sh | sh
@@ -39,14 +39,14 @@ curl -sSL https://github.com/rodrigo-speller/atone/releases/download/v0.0.5/aton
 
 ## How to use
 
-Atone is a process supervisor. That is, it is responsible for starting and monitoring processes. To assume this role,
-Atone must be executed as the main process of the container (PID 1 - *At One* 😉). To do this, sets the *command* or
-the *entrypoint* of your container to starts `atone`. For example, if you are using Docker, you can set the `CMD` or
-`ENTRYPOINT` to `atone`.
+Atone is a process supervisor. It is responsible for starting and monitoring processes. To assume this role, Atone must
+be executed as the main process of the container (PID 1 - *At One* 😉). For this, sets the *command* or the *entrypoint*
+of your container to starts `atone`. For example, if you are using Docker, you can set the `CMD` or `ENTRYPOINT` to
+`atone`.
 
 Atone uses a YAML file to configure the services that needs to be started and monitored on the container. The default
 configuration file is `/etc/atone.yaml`. But, you can set a custom configuration file by setting the `--config=<file>`
-command argument on the `atone` command.
+argument when executing `atone`.
 
 ```dockerfile
 CMD ["atone", "--config=/etc/atone.yaml"]
@@ -61,7 +61,7 @@ executed by Atone.
 CMD ["atone" , "--", "nginx", "-g", "daemon off;"]
 ```
 
-Execute `atone --help` to see all the available command arguments.
+Execute `atone --help` to see all available command arguments.
 
 ## Sample configuration file
 
