@@ -63,6 +63,36 @@ CMD ["atone" , "--", "nginx", "-g", "daemon off;"]
 
 Execute `atone --help` to see all the available command arguments.
 
+## Sample configuration file
+
+```yaml
+# Define the global settings for the container.
+settings:
+  # Set the working directory for the atone.
+  workdir: /srv
+
+# Define the services to be started and monitored by Atone.
+services:
+
+  # An example of a service that sleeps forever.
+  sleeping-svc:
+    # Set the command to be executed by the service.
+    command: sleep infinity
+    # Set the restart policy to restart the service.
+    # Possible values: no, always, on-failure, unless-stopped.
+    restart: always
+
+  # An example of a service that sleeps for 5 seconds.
+  five-seconds-svc:
+    command: /bin/sh -c "echo 'Service 1'; sleep 5"
+    restart: always
+
+  # An example of a service that sleeps for 10 seconds.
+  ten-seconds-svc:
+    command: /bin/sh -c "echo 'Service 2'; sleep 10"
+    restart: always
+```
+
 # How to code, build, run and debug
 
 Atone project is written in C++ and uses the [Makefile](https://www.gnu.org/software/make/) build system. This project
