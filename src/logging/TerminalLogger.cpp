@@ -79,7 +79,7 @@ namespace Atone {
         printf(
             "[%i-%02i-%02i %02i:%02i:%02i.%03i]",
             timeinfo->tm_year + 1900,
-            timeinfo->tm_mon,
+            timeinfo->tm_mon + 1,
             timeinfo->tm_mday,
             timeinfo->tm_hour,
             timeinfo->tm_min,
