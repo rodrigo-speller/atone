@@ -61,7 +61,40 @@ executed by Atone.
 CMD ["atone" , "--", "nginx", "-g", "daemon off;"]
 ```
 
+### Command usage
+
 Execute `atone --help` to see all available command arguments.
+
+```text
+Usage:
+  atone --config[=<file>] [options]
+  atone [--name=<name>] [options] [--] <cmd> <args...>
+  atone -h|--help
+  atone -v|--version
+
+Multi-services mode options:
+  -c, --config=FILE    Specifies the configuration file.
+                       (default: /etc/atone.yaml)
+
+Single-service mode options:
+  -n, --name=NAME      Specifies the service name.
+                       (default: main)
+
+General options:
+  -l, --log=LEVEL      Defines the minimum log level.
+                       (default: trace)
+                       The value must be one of:
+                           emergency, fatal, critical, error, warning, notice, information, debug or trace.
+  -L, --logger=LOGGER  Defines the logger type.
+                       (default: "terminal" for tty attached or "output")
+                       The value must be one of:
+                           output:     Logs to the output.
+                           terminal:   Logs to the output.
+                           syslog:     Logs to system log.
+                           null:       Don't logs.
+  -h, --help           Prints this help.
+  -v, --version        Prints the version.
+```
 
 ## Sample configuration file
 
