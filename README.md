@@ -7,7 +7,7 @@ With Atone, you can use a YAML file to configure your container's services. Then
 you start all the services from your configuration.
 To learn more about all the features of Atone, see the list of features.
 
-## Features
+# Features
 
 * Orphan-zombie process reaping
 * Services spawn
@@ -16,7 +16,7 @@ To learn more about all the features of Atone, see the list of features.
 * Automatic service restart
 * Signal forwarding
 
-### Future features
+## Future features
 
 * Service schedule
 
