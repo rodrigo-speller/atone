@@ -20,7 +20,7 @@ To learn more about all the features of Atone, see the list of features.
 
 * Service schedule
 
-# How to install and use
+# How to install
 
 To install Atone, you must execute the *install script* or download a specific version from the [releases page](https://github.com/rodrigo-speller/atone/releases).
 
@@ -37,7 +37,7 @@ A specific version can be installed by executing the following command:
 curl -sSL https://github.com/rodrigo-speller/atone/releases/download/v0.0.5/atone-install.sh | sh
 ```
 
-## How to use
+# How to use
 
 Atone is a process supervisor. It is responsible for starting and monitoring processes. To assume this role, Atone must
 be executed as the main process of the container (PID 1 - *At One* 😉). For this, sets the *command* or the *entrypoint*
@@ -61,7 +61,7 @@ executed by Atone.
 CMD ["atone" , "--", "nginx", "-g", "daemon off;"]
 ```
 
-### Command usage
+## Command usage
 
 Execute `atone --help` to see all available command arguments.
 
@@ -158,7 +158,7 @@ On other Linux distributions, you need to install the following packages:
 > If you want to contribute to the project, you can update this document, suggesting the packages to be installed in
 your distribution via pull request.
 
-## Build
+### Build
 
 Atone uses the [Makefile](https://www.gnu.org/software/make/) build system. To build the project, run the following
 command with, optionally, the desired make flags:
