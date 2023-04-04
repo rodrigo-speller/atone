@@ -1,18 +1,16 @@
-FROM      debian:bullseye
+# Copyright (c) Rodrigo Speller. All rights reserved.
+# Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-ARG       DEBIAN_FRONTEND=noninteractive
+FROM        debian:bullseye
 
-RUN       apt-get update && apt-get install -y \
-            curl \
-            fakeroot \
-            g++ \
-            gettext-base \
-            make
+ARG         DEBIAN_FRONTEND=noninteractive
 
-RUN       adduser --disabled-password --gecos "" packager && \
-            addgroup packager root && \
-            echo "packager    ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN         apt-get update && apt-get install -y \
+                g++ \
+                gettext-base \
+                git \
+                make
 
-WORKDIR   /work/atone
-USER      packager
-CMD       ["/work/entrypoint.sh"]
+ENV         ATONE_BUILD_DISTRO=debian
+WORKDIR     /work/atone
+CMD         ["scripts/package/debian/BUILD"]

@@ -1,6 +1,6 @@
 Package: atone
-Version: ${ATONE_BUILD_VERSION}
-Architecture: ${DEBIAN_PACKAGE_ARCH}
+Version: ${ATONE_BUILD_VERSION}-0
+Architecture: ${ATONE_PACKAGE_ARCH}
 Maintainer: Rodrigo Speller <rodrigo@speller.com.br>
 Description: Atone is a Linux init-like process supervisor.
  Atone is a tool for defining, running and monitoring

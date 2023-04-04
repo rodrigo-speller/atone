@@ -1,16 +1,11 @@
-FROM      alpine:3.13
+# Copyright (c) Rodrigo Speller. All rights reserved.
+# Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
-RUN       apk --no-cache --update add \
-            alpine-sdk
+FROM        alpine:3.13
 
-RUN       adduser -D packager && \
-            addgroup packager abuild && \
-            mkdir -p /var/cache/distfiles && \
-            chgrp abuild /var/cache/distfiles && \
-            chmod g+w /var/cache/distfiles && \
-            echo "packager    ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN         apk --no-cache --update add \
+                alpine-sdk
 
-ENV       PACKAGER_PRIVKEY=/work/keys/atone-95c4f951.rsa
-WORKDIR   /work/atone
-USER      packager
-CMD       ["abuild", "-P", "/work/atone/repo"]
+ENV         ATONE_BUILD_DISTRO=alpine
+WORKDIR     /work/atone
+CMD         ["scripts/package/alpine/BUILD"]

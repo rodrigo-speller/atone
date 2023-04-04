@@ -14,8 +14,8 @@ PRECOMPILE+=src/atone.h
 LIBRARY+=optparse
 LIBRARY+=yaml-cpp
 
-LIBRARY_PATH+=3rd-party/optparse/build/$(TARGET)/bin
-LIBRARY_PATH+=3rd-party/yaml-cpp/build/$(TARGET)/bin
+LIBRARY_PATH+=3rd-party/optparse/$(BUILDDIR)/$(TARGET)/bin
+LIBRARY_PATH+=3rd-party/yaml-cpp/$(BUILDDIR)/$(TARGET)/bin
 
 INCLUDE_PATH+=$(SRCDIR)
 INCLUDE_PATH+=3rd-party/optparse/include
@@ -114,14 +114,14 @@ after-build:
 # 3rd-party
 
 3rd-party: \
-  3rd-party/optparse/build/$(TARGET)/bin/liboptparse.a \
-  3rd-party/yaml-cpp/build/$(TARGET)/bin/libyaml-cpp.a
+  3rd-party/optparse/$(BUILDDIR)/$(TARGET)/bin/liboptparse.a \
+  3rd-party/yaml-cpp/$(BUILDDIR)/$(TARGET)/bin/libyaml-cpp.a
 
-3rd-party/optparse/build/$(TARGET)/bin/liboptparse.a:
+3rd-party/optparse/$(BUILDDIR)/$(TARGET)/bin/liboptparse.a:
 	@echo "Building optparse"
 	@$(MAKE) -C 3rd-party/optparse
 
-3rd-party/yaml-cpp/build/$(TARGET)/bin/libyaml-cpp.a:
+3rd-party/yaml-cpp/$(BUILDDIR)/$(TARGET)/bin/libyaml-cpp.a:
 	@echo "Building yaml-cpp"
 	@$(MAKE) -C 3rd-party/yaml-cpp
 

@@ -1,0 +1,16 @@
+# Contributor: Rodrigo Speller <rodrigo@speller.com.br>
+# Maintainer: Rodrigo Speller <rodrigo@speller.com.br>
+pkgname=atone
+pkgver=${ATONE_BUILD_VERSION}
+pkgrel=0
+pkgdesc="Atone is a Linux init-like process supervisor."
+url="https://github.com/rodrigo-speller/atone"
+arch=${ATONE_PACKAGE_ARCH}
+license="MIT"
+source=""
+builddir="$ATONE_PROJECT_DIR/$ATONE_BUILD_DIR"
+
+package() {
+  mkdir -p "$pkgdir/sbin"
+  cp "$builddir/release/bin/atone" "$pkgdir/sbin"
+}

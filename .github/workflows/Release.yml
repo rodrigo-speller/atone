@@ -2,39 +2,121 @@ name: Atone Release
 
 on:
   workflow_dispatch:
-    inputs:
-      package_version:
-        description: 'Build version'
-        required: true
+      inputs:
+        package_version:
+          description: 'Build version'
+          required: true
+
+permissions:
+  packages: write
 
 jobs:
-  pack:
-    runs-on: ${{ matrix.os }}
+  build_job:
+    # The host should always be linux
+    runs-on: ubuntu-20.04
+    name: Build on ${{ matrix.image }}
+
+    # Run steps on a matrix of arch/distro combinations
     strategy:
       matrix:
-        os: [ ubuntu-20.04 ]
+        include:
+            # aarch64
+            - image: arm64v8/alpine:3.13
+            - image: arm64v8/debian:bullseye
+            # armv7
+            - image: arm32v7/alpine:3.13
+            - image: arm32v7/debian:bullseye
+            # x86_64
+            - image: amd64/alpine:3.13
+            - image: amd64/debian:bullseye
 
     steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
 
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Setup host environment
+        env:
+          ATONE_PACKAGE_PRIVKEY_SECRET : ${{ secrets.ATONE_PACKAGE_PRIVKEY }}
+        run: |
+          # variables
+          ATONE_BUILD_DIR="build/$(sed 's/\W\+/_/g' <<< '${{ matrix.image }}')"
+          ATONE_BUILD_VERSION="${{ github.event.inputs.package_version }}"
+          ATONE_BUILD_ARCH="$(echo '${{ matrix.image }}' | cut -d':' -f1 | cut -d'/' -f1)"
+          ATONE_BUILD_DISTRO="$(echo '${{ matrix.image }}' | cut -d':' -f1 | cut -d'/' -f2)"
 
-    - name: Declare build variables
-      run: |
-        echo "ATONE_BUILD_VERSION=${{ github.event.inputs.package_version }}" >> $GITHUB_ENV
-        echo "ATONE_BUILD_NUMBER=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          source "${{ github.workspace }}/scripts/package/common.sh"
 
-    - name: Build
-      run: make
+          # filesytem
+          mkdir -p "${{ github.workspace }}/artifacts"
 
-    - name: Atone
-      run: build/release/bin/atone --version
+          # secrets
+          echo "$ATONE_PACKAGE_PRIVKEY_SECRET" > "$ATONE_PACKAGE_PRIVKEY"
 
-    - name: Declare artifact variables
-      run: |
-        echo "ATONE_ARTIFACT_NAME=$(build/release/bin/atone --version | awk -F ' ' '{print "atone-" $1 "-" $4}')" >> $GITHUB_ENV
+          # env
+          echo "ATONE_BUILD_DIR=${ATONE_BUILD_DIR}" >> $GITHUB_ENV
+          echo "ATONE_BUILD_VERSION=${ATONE_BUILD_VERSION}" >> $GITHUB_ENV
+          echo "ATONE_BUILD_DISTRO=${ATONE_BUILD_DISTRO}" >> $GITHUB_ENV
+          echo "ATONE_BUILD_ARCH=${ATONE_BUILD_ARCH}" >> $GITHUB_ENV
+          echo "ATONE_PACKAGE_ARCH=${ATONE_PACKAGE_ARCH}" >> $GITHUB_ENV
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: ${{ env.ATONE_ARTIFACT_NAME }}
-        path: build/release/bin/atone
+      - name: Build artifact
+        uses: ciemu/action@v0
+        id: build
+        with:
+          image: ${{ matrix.image }}
+
+          # The shell to run commands with in the container
+          shell: /bin/sh
+
+          build: |
+            case '${{ matrix.image }}' in
+
+              *alpine*)
+                apk --no-cache --update add \
+                    alpine-sdk
+                ;;
+              
+              # debian based distros
+              *debian*|*ubuntu*)
+                apt-get update -q -y
+                apt-get install -q -y \
+                    g++ \
+                    gettext-base \
+                    git \
+                    make
+                ;;
+
+              *)
+                echo "Unknown distro for image: ${{ matrix.image }}"
+                exit 1
+                ;;
+
+            esac
+
+            # set workspace as safe directory
+            git config --global --add safe.directory "${{ github.workspace }}"
+
+          # Run commands in the container
+
+          env: |
+            ATONE_BUILD_DIR
+            ATONE_BUILD_VERSION
+            ATONE_BUILD_DISTRO
+            ATONE_BUILD_ARCH
+            ATONE_PACKAGE_ARCH
+          bind: |
+            "${{ github.workspace }}/artifacts:/artifacts"
+          run: |
+            echo "Building package..."
+            "./scripts/package/${ATONE_BUILD_DISTRO}/BUILD"
+
+            echo "Copying artifacts..."
+            mkdir -p "/artifacts"
+            cp -r "$ATONE_BUILD_DIR"/publish/* "/artifacts"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: packages
+          path: ${{ github.workspace }}/artifacts/*
+          if-no-files-found: error
