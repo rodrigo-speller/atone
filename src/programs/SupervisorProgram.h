@@ -13,7 +13,7 @@ namespace Atone {
     class SupervisorProgram: public ProgramBase {
     private:
         void Bootstrap(Context &context);
-        void MainLoop(Context &context);
+        bool MainLoop(Context &context);
         bool Shutdown(Context &context);
 
         bool ReapProcesses(ServicesManager *services, bool restart = false);

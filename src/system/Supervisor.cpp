@@ -148,6 +148,7 @@ namespace Atone {
     pid_t Supervisor::Spawn(char *const argv[]) {
         RequireInstance();
 
+        auto ppid = getpid();
         auto pid = vfork();
         
         if (pid < 0) { // error
@@ -180,6 +181,7 @@ namespace Atone {
 
             // execution must not return, except on error
             Log::crit("service exec failed: %s", strerror(errno));
+            SendSignal(ppid, SIGABRT);
             _exit(EXIT_FAILURE);
 
         }

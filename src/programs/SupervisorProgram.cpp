@@ -39,7 +39,11 @@ namespace Atone {
         auto context = Context::FromOptions(options);
 
         Bootstrap(context);
-        MainLoop(context);
+
+        if (!MainLoop(context)) {
+            exitcode = EXIT_FAILURE;
+        }
+
         if (!Shutdown(context)) {
             exitcode = EXIT_FAILURE;
         }
@@ -74,7 +78,7 @@ namespace Atone {
      * Supervisor main loop.
      * @param context Execution context.
      */
-    void SupervisorProgram::MainLoop(Context &context) {
+    bool SupervisorProgram::MainLoop(Context &context) {
         auto &services = context.services;
 
         // wait signal loop
@@ -83,6 +87,11 @@ namespace Atone {
             int signum = Supervisor::WaitSignal(&siginfo);
 
             switch (signum) {
+                // abort program by abnormal termination
+                case SIGABRT: {
+                    Log::crit("signal received: %s", strsignal(signum));
+                    return false;
+                }
                 // Hangup detected on controlling terminal or death of controlling process
                 case SIGHUP:
                 // interrupt by user
@@ -92,7 +101,7 @@ namespace Atone {
                 // terminate process
                 case SIGTERM: {
                     Log::notice("signal received: %s", strsignal(signum));
-                    return;
+                    return true;
                 }
                 // child process exited
                 case SIGCHLD: {
@@ -101,7 +110,7 @@ namespace Atone {
                     // reap child process
                     if (ReapProcesses(services, true)) {
                         // no more processes still running
-                        return;
+                        return true;
                     }
                     
                     break;
