@@ -5,8 +5,8 @@
 
 namespace Atone {
 
-    enum class ServiceRestartMode {
-        No,
+    enum class ServiceRestartPolicy {
+        Never,
         Always,
         OnFailure,
         UnlessStopped,

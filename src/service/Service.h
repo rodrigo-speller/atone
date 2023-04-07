@@ -97,10 +97,10 @@ namespace Atone {
     vector<string> dependsOn() const;
     
     /**
-     * Gets the service restart mode.
-     * @return The service restart mode.
+     * Gets the service restart policy.
+     * @return The service restart policy.
      */
-    ServiceRestartMode restartMode() const;
+    ServiceRestartPolicy restartPolicy() const;
 
     ////////////////////////////////////////////////////////////////////
 

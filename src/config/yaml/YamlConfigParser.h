@@ -21,6 +21,6 @@ namespace Atone {
 
         void SetCommandArgs(ServiceConfig &target, const YAML::Node &command);
         void SetDependsOn(ServiceConfig &target, const YAML::Node &depends_on);
-        void SetRestartMode(ServiceConfig &target, const YAML::Node &restart);
+        void SetRestartPolicy(ServiceConfig &target, const YAML::Node &restart);
     };
 }

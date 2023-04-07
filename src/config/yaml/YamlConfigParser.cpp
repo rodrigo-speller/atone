@@ -84,7 +84,7 @@ namespace Atone {
         if (depends_on) SetDependsOn(svcConfig, depends_on);
 
         auto restart = config["restart"];
-        if (restart) SetRestartMode(svcConfig, restart);
+        if (restart) SetRestartPolicy(svcConfig, restart);
 
         return svcConfig;
     }
@@ -136,33 +136,33 @@ namespace Atone {
         target.depends_on = value;
     }
 
-    void YamlConfigParser::SetRestartMode(ServiceConfig &target, const YAML::Node &restart) {
+    void YamlConfigParser::SetRestartPolicy(ServiceConfig &target, const YAML::Node &restart) {
         switch (restart.Type()) {
             case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
-                target.restart = ServiceRestartMode::No;
+                target.restart = ServiceRestartPolicy::Never;
                 return;
 
             case YAML::NodeType::Scalar:
                 break;
 
             default:
-                throw AtoneException("invalid restart");
+                throw AtoneException("invalid restart policy");
         }
 
         auto str_value = restart.as<std::string>();
 
-        ServiceRestartMode value;
-        if (str_value == "no")
-            value = ServiceRestartMode::No;
+        ServiceRestartPolicy value;
+        if (str_value == "never" || str_value == "no" /* legacy */)
+            value = ServiceRestartPolicy::Never;
         else if (str_value == "always")
-            value = ServiceRestartMode::Always;
+            value = ServiceRestartPolicy::Always;
         else if (str_value == "on-failure")
-            value = ServiceRestartMode::OnFailure;
+            value = ServiceRestartPolicy::OnFailure;
         else if (str_value == "unless-stopped")
-            value = ServiceRestartMode::UnlessStopped;
+            value = ServiceRestartPolicy::UnlessStopped;
         else
-            throw AtoneException("invalid restart");
+            throw AtoneException("invalid restart policy");
 
         target.restart = value;
     }

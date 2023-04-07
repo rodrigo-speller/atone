@@ -24,7 +24,7 @@ namespace Atone {
   size_t Service::argc() const { return config.argc; }
   shared_ptr<char *> Service::argv() const { return config.argv; }
   vector<string> Service::dependsOn() const { return config.depends_on; }
-  ServiceRestartMode Service::restartMode() const { return config.restart; }
+  ServiceRestartPolicy Service::restartPolicy() const { return config.restart; }
 
   //////////////////////////////////////////////////////////////////////
 
@@ -41,19 +41,19 @@ namespace Atone {
       return false;
     }
 
-    switch (restartMode()) {
-      case ServiceRestartMode::No:
+    switch (restartPolicy()) {
+      case ServiceRestartPolicy::Never:
         return false;
-      case ServiceRestartMode::Always:
+      case ServiceRestartPolicy::Always:
         return true;
-      case ServiceRestartMode::OnFailure:
+      case ServiceRestartPolicy::OnFailure:
         return (exitCode() != EXIT_SUCCESS);
         break;
-      case ServiceRestartMode::UnlessStopped:
+      case ServiceRestartPolicy::UnlessStopped:
         return (status() != ServiceStatus::Stopped);
         break;
       default:
-        throw domain_error("invalid restart mode");
+        throw domain_error("invalid restart policy");
     }
   }
 
