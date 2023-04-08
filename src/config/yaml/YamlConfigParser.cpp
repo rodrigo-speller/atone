@@ -140,7 +140,7 @@ namespace Atone {
         switch (restart.Type()) {
             case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
-                target.restart = ServiceRestartPolicy::Never;
+                target.restart = ServiceRestartPolicy::No;
                 return;
 
             case YAML::NodeType::Scalar:
@@ -153,8 +153,8 @@ namespace Atone {
         auto str_value = restart.as<std::string>();
 
         ServiceRestartPolicy value;
-        if (str_value == "never" || str_value == "no" /* legacy */)
-            value = ServiceRestartPolicy::Never;
+        if (str_value == "no")
+            value = ServiceRestartPolicy::No;
         else if (str_value == "always")
             value = ServiceRestartPolicy::Always;
         else if (str_value == "on-failure")

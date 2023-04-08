@@ -42,7 +42,7 @@ namespace Atone {
     }
 
     switch (restartPolicy()) {
-      case ServiceRestartPolicy::Never:
+      case ServiceRestartPolicy::No:
         return false;
       case ServiceRestartPolicy::Always:
         return true;

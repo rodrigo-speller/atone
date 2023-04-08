@@ -17,7 +17,7 @@ namespace Atone {
             size_t argc = 0;
             shared_ptr<char *> argv = NULL;
             std::vector<std::string> depends_on;
-            ServiceRestartPolicy restart = ServiceRestartPolicy::Never;
+            ServiceRestartPolicy restart = ServiceRestartPolicy::No;
 
             void SetCommandArgs(const std::string &command);
             void SetCommandArgs(const size_t argc, char **argv);
