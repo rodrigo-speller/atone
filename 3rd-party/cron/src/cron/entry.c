@@ -55,9 +55,6 @@ static int	get_list(bitstr_t *, int, int, const char *[], int, FILE *),
 
 void
 free_entry(entry *e) {
-	free(e->cmd);
-	free(e->pwd);
-	env_free(e->envp);
 	free(e);
 }
 
@@ -83,12 +80,8 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 	entry *e;
 	int ch;
 	char cmd[MAX_COMMAND];
-	char envstr[MAX_ENVSTR];
-	char **tenvp;
 
 	Debug(DPARS, ("load_entry()...about to eat comments\n"))
-
-	skip_comments(file);
 
 	ch = get_char(file);
 	if (ch == EOF)
@@ -216,7 +209,7 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 			e->flags |= DOW_STAR;
 		ch = get_list(e->dow, FIRST_DOW, LAST_DOW,
 			      DowNames, ch, file);
-		if (ch == EOF) {
+		if (ch != EOF) {
 			ecode = e_dow;
 			goto eof;
 		}
@@ -228,153 +221,6 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 		bit_set(e->dow, 7);
 	}
 
-	/* check for permature EOL and catch a common typo */
-	if (ch == '\n' || ch == '*') {
-		ecode = e_cmd;
-		goto eof;
-	}
-
-	/* ch is the first character of a command, or a username */
-	unget_char(ch, file);
-
-	if (!pw) {
-		char		*username = cmd;	/* temp buffer */
-
-		Debug(DPARS, ("load_entry()...about to parse username\n"))
-		ch = get_string(username, MAX_COMMAND, file, " \t\n");
-
-		Debug(DPARS, ("load_entry()...got %s\n",username))
-		if (ch == EOF || ch == '\n' || ch == '*') {
-			ecode = e_cmd;
-			goto eof;
-		}
-
-		/* Need to have consumed blanks before checking for options
-		 * below. */
-		Skip_Blanks(ch, file)
-		unget_char(ch, file);
-		
-		pw = getpwnam(username);
-		if (pw == NULL) {
-			ecode = e_username;
-			goto eof;
-		}
-		Debug(DPARS, ("load_entry()...uid %ld, gid %ld\n",
-			      (long)pw->pw_uid, (long)pw->pw_gid))
-	}
-
-	if ((e->pwd = pw_dup(pw)) == NULL) {
-		ecode = e_memory;
-		goto eof;
-	}
-	bzero(e->pwd->pw_passwd, strlen(e->pwd->pw_passwd));
-
-	/* copy and fix up environment.  some variables are just defaults and
-	 * others are overrides.
-	 */
-	if ((e->envp = env_copy(envp)) == NULL) {
-		ecode = e_memory;
-		goto eof;
-	}
-	if (!env_get("SHELL", e->envp)) {
-		if (glue_strings(envstr, sizeof envstr, "SHELL",
-				 _PATH_BSHELL, '=')) {
-			if ((tenvp = env_set(e->envp, envstr)) == NULL) {
-				ecode = e_memory;
-				goto eof;
-			}
-			e->envp = tenvp;
-		} else
-			log_it("CRON", getpid(), "error", "can't set SHELL");
-	}
-	if (!env_get("HOME", e->envp)) {
-		if (glue_strings(envstr, sizeof envstr, "HOME",
-				 pw->pw_dir, '=')) {
-			if ((tenvp = env_set(e->envp, envstr)) == NULL) {
-				ecode = e_memory;
-				goto eof;
-			}
-			e->envp = tenvp;
-		} else
-			log_it("CRON", getpid(), "error", "can't set HOME");
-	}
-#ifndef LOGIN_CAP
-	/* If login.conf is in used we will get the default PATH later. */
-	if (!env_get("PATH", e->envp)) {
-		if (glue_strings(envstr, sizeof envstr, "PATH",
-				 _PATH_DEFPATH, '=')) {
-			if ((tenvp = env_set(e->envp, envstr)) == NULL) {
-				ecode = e_memory;
-				goto eof;
-			}
-			e->envp = tenvp;
-		} else
-			log_it("CRON", getpid(), "error", "can't set PATH");
-	}
-#endif /* LOGIN_CAP */
-	if (glue_strings(envstr, sizeof envstr, "LOGNAME",
-			 pw->pw_name, '=')) {
-		if ((tenvp = env_set(e->envp, envstr)) == NULL) {
-			ecode = e_memory;
-			goto eof;
-		}
-		e->envp = tenvp;
-	} else
-		log_it("CRON", getpid(), "error", "can't set LOGNAME");
-#if defined(BSD) || defined(__linux)
-	if (glue_strings(envstr, sizeof envstr, "USER",
-			 pw->pw_name, '=')) {
-		if ((tenvp = env_set(e->envp, envstr)) == NULL) {
-			ecode = e_memory;
-			goto eof;
-		}
-		e->envp = tenvp;
-	} else
-		log_it("CRON", getpid(), "error", "can't set USER");
-#endif
-
-	Debug(DPARS, ("load_entry()...about to parse command\n"))
-
-	/* If the first character of the command is '-' it is a cron option.
-	 */
-	while ((ch = get_char(file)) == '-') {
-		switch (ch = get_char(file)) {
-		case 'q':
-			e->flags |= DONT_LOG;
-			Skip_Nonblanks(ch, file)
-			break;
-		default:
-			ecode = e_option;
-			goto eof;
-		}
-		Skip_Blanks(ch, file)
-		if (ch == EOF || ch == '\n') {
-			ecode = e_cmd;
-			goto eof;
-		}
-	}
-	unget_char(ch, file);
-
-	/* Everything up to the next \n or EOF is part of the command...
-	 * too bad we don't know in advance how long it will be, since we
-	 * need to malloc a string for it... so, we limit it to MAX_COMMAND.
-	 */ 
-	ch = get_string(cmd, MAX_COMMAND, file, "\n");
-
-	/* a file without a \n before the EOF is rude, so we'll complain...
-	 */
-	if (ch == EOF) {
-		ecode = e_cmd;
-		goto eof;
-	}
-
-	/* got the command in the 'cmd' string; save it in *e.
-	 */
-	if ((e->cmd = strdup(cmd)) == NULL) {
-		ecode = e_memory;
-		goto eof;
-	}
-
 	Debug(DPARS, ("load_entry()...returning successfully\n"))
 
 	/* success, fini, return pointer to the entry we just created...
@@ -382,12 +228,6 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 	return (e);
 
  eof:
-	if (e->envp)
-		env_free(e->envp);
-	if (e->pwd)
-		free(e->pwd);
-	if (e->cmd)
-		free(e->cmd);
 	free(e);
 	while (ch != '\n' && !feof(file))
 		ch = get_char(file);
@@ -457,8 +297,6 @@ get_range(bitstr_t *bits, int low, int high, const char *names[],
 		num1 = low;
 		num2 = high;
 		ch = get_char(file);
-		if (ch == EOF)
-			return (EOF);
 	} else {
 		ch = get_number(&num1, low, names, ch, file, ",- \t\n");
 		if (ch == EOF)

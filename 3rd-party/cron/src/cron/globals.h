@@ -28,19 +28,6 @@
 # define INIT(x)
 #endif
 
-XTRN const char *copyright[]
-#ifdef MAIN_PROGRAM
-	= {
-		"@(#) Vixie Cron",
-		"@(#) Copyright 1988,1989,1990,1993,1994,2021 by Paul Vixie",
-		"@(#) Copyright 1997,2000 by Internet Software Consortium, Inc.",
-		"@(#) Copyright 2004 by Internet Systems Consortium, Inc.",
-		"@(#) All rights reserved",
-		NULL
-	}
-#endif
-	;
-
 XTRN const char *MonthNames[]
 #ifdef MAIN_PROGRAM
 	= {
@@ -60,15 +47,7 @@ XTRN const char *DowNames[]
 #endif
 	;
 
-XTRN char	*ProgramName INIT("amnesia");
 XTRN int	LineNumber INIT(0);
-XTRN time_t	StartTime INIT(0);
-XTRN int	NoFork INIT(0);
-XTRN const struct timespec ts_zero 
-#ifdef MAIN_PROGRAM
-= {.tv_sec = 0, .tv_nsec = 0}
-#endif
-;
 #if DEBUGGING
 XTRN int	DebugFlags INIT(0);
 XTRN const char *DebugFlagNames[]

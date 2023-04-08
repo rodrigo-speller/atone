@@ -11,13 +11,16 @@ rebuild: clean build
 
 PRECOMPILE+=src/atone.h
 
+LIBRARY+=cron
 LIBRARY+=optparse
 LIBRARY+=yaml-cpp
 
+LIBRARY_PATH+=3rd-party/cron/$(BUILDDIR)/$(TARGET)/bin
 LIBRARY_PATH+=3rd-party/optparse/$(BUILDDIR)/$(TARGET)/bin
 LIBRARY_PATH+=3rd-party/yaml-cpp/$(BUILDDIR)/$(TARGET)/bin
 
 INCLUDE_PATH+=$(SRCDIR)
+INCLUDE_PATH+=3rd-party/cron/include
 INCLUDE_PATH+=3rd-party/optparse/include
 INCLUDE_PATH+=3rd-party/yaml-cpp/include
 
@@ -114,8 +117,13 @@ after-build:
 # 3rd-party
 
 3rd-party: \
+  3rd-party/cron/$(BUILDDIR)/$(TARGET)/bin/libcron.a \
   3rd-party/optparse/$(BUILDDIR)/$(TARGET)/bin/liboptparse.a \
   3rd-party/yaml-cpp/$(BUILDDIR)/$(TARGET)/bin/libyaml-cpp.a
+
+3rd-party/cron/$(BUILDDIR)/$(TARGET)/bin/libcron.a:
+	@echo "Building libcron"
+	@$(MAKE) -C 3rd-party/cron
 
 3rd-party/optparse/$(BUILDDIR)/$(TARGET)/bin/liboptparse.a:
 	@echo "Building optparse"
@@ -132,6 +140,7 @@ clean:
 
 clean-all:
 	@-rm -rv -- $(BUILDDIR) || true
+	@$(MAKE) -C 3rd-party/cron clean-all
 	@$(MAKE) -C 3rd-party/optparse clean-all
 	@$(MAKE) -C 3rd-party/yaml-cpp clean-all
 

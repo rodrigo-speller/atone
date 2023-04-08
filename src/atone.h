@@ -35,6 +35,7 @@ using namespace std;
 
 // 3rd-party libs
 
+#include "cronutils.h"
 #include "optparse.h"
 #include "yaml-cpp/yaml.h"
 
