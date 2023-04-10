@@ -4,13 +4,14 @@
             "name": "default",
             "includePath": [
                 "src",
+                "3rd-party/cron/include",
                 "3rd-party/optparse/include",
                 "3rd-party/yaml-cpp/include"
             ],
             "intelliSenseMode": "linux-gcc-x64",
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "gnu17",
-            "cppStandard": "gnu++17"
+            "cStandard": "c17",
+            "cppStandard": "c++17"
         }
     ],
     "version": 4

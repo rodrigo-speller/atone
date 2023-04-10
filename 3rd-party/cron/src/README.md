@@ -12,38 +12,58 @@ The following changes have been made to the original code:
 - The included files have been stripped of unecessary code to only parse the cron expressions.
 - In addition to strip unnecessary lines, only these lines of the original source code has been changed to allow parsing only cron expressions, without commands:
 
-    ```diff
-    --- a/3rd-party/cron/src/cron/entry.c
-    +++ b/3rd-party/cron/src/cron/entry.c
+    - Parses only the first five fields of the cron expression:
+
+        ```diff
+        --- a/3rd-party/cron/src/cron/entry.c
+        +++ b/3rd-party/cron/src/cron/entry.c
 
 
-        Skip_Blanks(ch, file);
-    -   if (ch == EOF || ch == '\n') {
-    -       ecode = e_cmd;
-    +   if (ch != EOF) {
-    +       ecode = e_timespec;
-            goto eof;
-        }
-    ```
+            Skip_Blanks(ch, file);
+        -   if (ch == EOF || ch == '\n') {
+        -       ecode = e_cmd;
+        +   if (ch != EOF) {
+        +       ecode = e_timespec;
+                goto eof;
+            }
+        ```
 
-    And:
+        And:
 
-    ```diff
-    --- a/3rd-party/cron/src/cron/entry.c
-    +++ b/3rd-party/cron/src/cron/entry.c
+        ```diff
+        --- a/3rd-party/cron/src/cron/entry.c
+        +++ b/3rd-party/cron/src/cron/entry.c
 
-        /* DOW (days of week)
-        */
-        if (ch == '*')
-            e->flags |= DOW_STAR;
-        ch = get_list(e->dow, FIRST_DOW, LAST_DOW,
-                    DowNames, ch, file);
-    -   if (ch == EOF) {
-    +   if (ch != EOF) {
-            ecode = e_dow;
-            goto eof;
-        }
-    ```
+            /* DOW (days of week)
+            */
+            if (ch == '*')
+                e->flags |= DOW_STAR;
+            ch = get_list(e->dow, FIRST_DOW, LAST_DOW,
+                        DowNames, ch, file);
+        -   if (ch == EOF) {
+        +   if (ch != EOF) {
+                ecode = e_dow;
+                goto eof;
+            }
+        ```
+
+    - Make the project target to C17, instead of GNU17:
+
+        ```diff
+        --- a/3rd-party/cron/src/cron/externs.h
+        +++ b/3rd-party/cron/src/cron/externs.h
+
+            #include <bitstring.h>
+            #include <ctype.h>
+            #include <dirent.h>
+            #include <pwd.h>
+            #include <stdarg.h>
+            #include <stdio.h>
+            #include <stdlib.h>
+            #include <string.h>
+        +   #include <strings.h>
+            #include <time.h>
+        ```
 
 ## License
 

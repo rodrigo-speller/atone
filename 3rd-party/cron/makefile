@@ -14,7 +14,7 @@ INCLUDE_PATH+=include
 ARFLAGS=rc
 #CFLAGS+=-Wall
 CFLAGS+=-fdiagnostics-color=always
-CFLAGS+=-std=gnu17
+CFLAGS+=-std=c17
 CFLAGS+=-MMD
 
 #-----------------------------------------------------------------------
