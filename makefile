@@ -13,6 +13,8 @@ FORCE: ;
 
 PRECOMPILE+=src/atone.h
 
+LIBRARY+=rt
+
 LIBRARY+=cron
 LIBRARY+=optparse
 LIBRARY+=yaml-cpp
