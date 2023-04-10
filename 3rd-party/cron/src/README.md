@@ -10,23 +10,39 @@ The following changes have been made to the original code:
 
 - Only the necessary files have been included in the Atone source tree.
 - The included files have been stripped of unecessary code to only parse the cron expressions.
-- In addition to strip unnecessary lines, only one line of the original source code has been changed to allow parsing only the cron expressions, without commands:
+- In addition to strip unnecessary lines, only these lines of the original source code has been changed to allow parsing only cron expressions, without commands:
 
     ```diff
     --- a/3rd-party/cron/src/cron/entry.c
     +++ b/3rd-party/cron/src/cron/entry.c
 
-    /* DOW (days of week)
-    */
-    if (ch == '*')
-        e->flags |= DOW_STAR;
-    ch = get_list(e->dow, FIRST_DOW, LAST_DOW,
-                DowNames, ch, file);
-    -if (ch == EOF) {
-    +if (ch != EOF) {
-        ecode = e_dow;
-        goto eof;
-    }
+
+        Skip_Blanks(ch, file);
+    -   if (ch == EOF || ch == '\n') {
+    -       ecode = e_cmd;
+    +   if (ch != EOF) {
+    +       ecode = e_timespec;
+            goto eof;
+        }
+    ```
+
+    And:
+
+    ```diff
+    --- a/3rd-party/cron/src/cron/entry.c
+    +++ b/3rd-party/cron/src/cron/entry.c
+
+        /* DOW (days of week)
+        */
+        if (ch == '*')
+            e->flags |= DOW_STAR;
+        ch = get_list(e->dow, FIRST_DOW, LAST_DOW,
+                    DowNames, ch, file);
+    -   if (ch == EOF) {
+    +   if (ch != EOF) {
+            ecode = e_dow;
+            goto eof;
+        }
     ```
 
 ## License

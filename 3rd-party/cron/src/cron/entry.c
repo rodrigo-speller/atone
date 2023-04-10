@@ -152,8 +152,8 @@ load_entry(FILE *file, void (*error_func)(), struct passwd *pw, char **envp) {
 		 * username/command.
 		 */
 		Skip_Blanks(ch, file);
-		if (ch == EOF || ch == '\n') {
-			ecode = e_cmd;
+		if (ch != EOF) {
+			ecode = e_timespec;
 			goto eof;
 		}
 	} else {
