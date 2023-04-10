@@ -13,10 +13,23 @@ typedef struct __cron_time_state_t {
     int dom;
     int month;
     int dow;
+    int year;
 } __cron_time_state_t;
 
-cron_expr_t *cron_expr_alloc() {
-    return calloc(1, sizeof(cron_expr_t));
+cron_expr_t *cron_expr_alloc(const cron_expr_t *const clone_expr_ptr) {
+    cron_expr_t *expr = calloc(1, sizeof(cron_expr_t));
+
+    if (expr == NULL) {
+        return NULL;
+    }
+
+    if (clone_expr_ptr != NULL && clone_expr_ptr->expr_st_ptr != NULL) {
+        entry *expr_st = calloc(1, sizeof(entry));
+        *expr_st = *(entry*)clone_expr_ptr->expr_st_ptr;
+        expr->expr_st_ptr = expr_st;
+    }
+
+    return expr;
 }
 
 void cron_expr_free(cron_expr_t *expr_ptr) {
@@ -120,8 +133,20 @@ int cron_expr_match_reboot(const cron_expr_t *expr_ptr) {
     return !!(entry_ptr->flags & WHEN_REBOOT);
 }
 
-cron_time_t *cron_time_alloc() {
-    return calloc(1, sizeof(cron_time_t));
+cron_time_t *cron_time_alloc(const cron_time_t *const clone_time_ptr) {
+    cron_time_t *cron = calloc(1, sizeof(cron_time_t));
+
+    if (cron == NULL) {
+        return NULL;
+    }
+
+    if (clone_time_ptr != NULL && clone_time_ptr->time_st_ptr != NULL) {
+        __cron_time_state_t *time_st = calloc(1, sizeof(__cron_time_state_t));
+        *time_st = *(__cron_time_state_t*)clone_time_ptr->time_st_ptr;
+        cron->time_st_ptr = time_st;
+    }
+
+    return cron;
 }
 
 void cron_time_free(cron_time_t *time_ptr) {
@@ -177,6 +202,7 @@ void cron_time_set(cron_time_t *cron_time, const time_t *timer) {
     time_st->dom = tm->tm_mday -FIRST_DOM;
     time_st->month = tm->tm_mon +1 /* 0..11 -> 1..12 */ -FIRST_MONTH;
     time_st->dow = tm->tm_wday -FIRST_DOW;
+    time_st->year = tm->tm_year;
     /** End: extracted from find_jobs at cron.c **/
 
     if (cron_time->time_st_ptr != NULL) {
@@ -184,4 +210,110 @@ void cron_time_set(cron_time_t *cron_time, const time_t *timer) {
     }
 
     cron_time->time_st_ptr = time_st;
+}
+
+#define cron_int_cmp(a, b, fallback) ((a) < (b) ? -1 : (a) > (b) ? 1 : fallback)
+
+int cron_time_cmp(const cron_time_t * const op1, const cron_time_t * const op2) {
+    if (op1 == NULL || op2 == NULL) {
+        return -1;
+    }
+
+    __cron_time_state_t *op1_time_st = op1->time_st_ptr;
+    __cron_time_state_t *op2_time_st = op2->time_st_ptr;
+
+    if (op1_time_st == NULL || op2_time_st == NULL) {
+        return -1;
+    }
+
+    int cmp = cron_int_cmp(
+        op1_time_st->year,
+        op2_time_st->year,
+        cron_int_cmp(
+            op1_time_st->month,
+            op2_time_st->month,
+            cron_int_cmp(
+                op1_time_st->dom,
+                op2_time_st->dom,
+                cron_int_cmp(
+                    op1_time_st->hour,
+                    op2_time_st->hour,
+                    cron_int_cmp(
+                        op1_time_st->minute,
+                        op2_time_st->minute,
+                        0
+                    )
+                )
+            )
+        )
+    );
+
+    return cmp;
+}
+
+void cron_time_inc(cron_time_t * const cron_time) {
+    if (cron_time == NULL) {
+        return;
+    }
+
+    __cron_time_state_t *time_st = cron_time->time_st_ptr;
+
+    if (time_st == NULL) {
+        return;
+    }
+    time_st->minute++;
+    if (time_st->minute >= 60) {
+        time_st->minute = 0;
+        time_st->hour++;
+
+        if (time_st->hour >= 24) {
+            time_st->hour = 0;
+            time_st->dow++;
+
+            if (time_st->dow >= 7) {
+                time_st->dow = 0;
+            }
+
+            time_st->dom++;
+
+            if (time_st->dom >= 29) {
+                switch (time_st->month) {
+                    case 1: // feb
+                        if (time_st->year % 4 == 0 && (time_st->year % 100 != 0 || time_st->year % 400 == 0)) {
+                            if (time_st->dom >= 29) {
+                                time_st->dom = 0;
+                            }
+                        }
+                        else {
+                            if (time_st->dom >= 28) {
+                                time_st->dom = 0;
+                            }
+                        }
+                        break;
+                    case 3: // apr
+                    case 5: // jun
+                    case 8: // sep
+                    case 10: // nov
+                        if (time_st->dom >= 30) {
+                            time_st->dom = 0;
+                        }
+                        break;
+                    default:
+                        if (time_st->dom >= 31) {
+                            time_st->dom = 0;
+                        }
+                        break;
+                }
+
+                if (time_st->dom == 0) {
+                    time_st->month++;
+
+                    if (time_st->month >= 12) {
+                        time_st->month = 0;
+                        time_st->year++;
+                    }
+                }
+            }
+        }
+    }
 }

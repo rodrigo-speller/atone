@@ -6,6 +6,8 @@
 #define ATONE_OPTION_DEFAULT_CONFIGFILE "/etc/atone.yaml"
 #define ATONE_OPTION_DEFAULT_SERVICENAME "main"
 
+#define ATONE_SCHEDULER_SIGNAL                          (SIGRTMAX)
+
 #define ATONE_TERM_CSI_RESET                            "\x1B[0m"
 #define ATONE_TERM_CSI_BOLD                             "\x1B[1m"
 #define ATONE_TERM_CSI_DIM                              "\x1B[2m"

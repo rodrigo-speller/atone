@@ -9,8 +9,9 @@ namespace Atone {
   class ServicesManager;
 }
 
-#include "config/AtoneOptions.h"
+#include "config/ServiceConfig.h"
 #include "service/Service.h"
+#include "utils/CronTime.h"
 
 namespace Atone {
 
@@ -26,7 +27,8 @@ namespace Atone {
             bool TryGetService(const pid_t pid, Service *&result) const;
             bool TryGetService(const std::string &name, Service *&result) const;
 
-            void Start();
+            void Bootstrap();
+            void CheckSchedule(CronTime *begin, CronTime *end);
             bool Stop();
             bool CheckAllServices() const;
             bool CheckService(Service *service) const;

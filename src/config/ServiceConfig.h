@@ -18,12 +18,10 @@ namespace Atone {
             shared_ptr<char *> argv = NULL;
             std::vector<std::string> depends_on;
             ServiceRestartPolicy restart = ServiceRestartPolicy::No;
+            std::vector<std::string> schedule;
 
             void SetCommandArgs(const std::string &command);
             void SetCommandArgs(const size_t argc, char **argv);
-
-        private:
-            void FreeCommandArgs();
     };
 
 }

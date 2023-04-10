@@ -86,6 +86,9 @@ namespace Atone {
         auto restart = config["restart"];
         if (restart) SetRestartPolicy(svcConfig, restart);
 
+        auto schedule = config["schedule"];
+        if (schedule) SetSchedule(svcConfig, schedule);
+
         return svcConfig;
     }
 
@@ -166,4 +169,37 @@ namespace Atone {
 
         target.restart = value;
     }
+
+    void YamlConfigParser::SetSchedule(ServiceConfig &target, const YAML::Node &schedule) {
+        switch (schedule.Type()) {
+            case YAML::NodeType::Null:
+            case YAML::NodeType::Undefined:
+                target.depends_on = std::vector<std::string>();
+                return;
+
+            case YAML::NodeType::Scalar:
+                target.schedule = std::vector<std::string>{schedule.as<std::string>()};
+                return;
+
+            case YAML::NodeType::Sequence:
+                break;
+
+            default:
+                throw AtoneException("invalid schedule");
+        }
+
+        size_t sz = schedule.size();
+        auto value = std::vector<std::string>(sz);
+        for (size_t i = 0; i < sz; i++) {
+            auto node = schedule[i];
+
+            if (node.Type() != YAML::NodeType::Scalar)
+                throw AtoneException("invalid schedule");
+
+            value[i] = node.as<std::string>();
+        }
+
+        target.schedule = value;
+    }
+
 }

@@ -38,7 +38,7 @@ typedef struct cron_time_t {
  * Allocate a new cron expression state.
  */
 CRON_API_EXPORT
-cron_expr_t *cron_expr_alloc(void);
+cron_expr_t *cron_expr_alloc(const cron_expr_t *const clone_expr_ptr);
 
 /**
  * Free a cron expression state.
@@ -74,10 +74,12 @@ CRON_API_EXPORT
 int cron_expr_match_reboot(const cron_expr_t *expr_ptr);
 
 /**
- * Allocate a new cron time state.
+ * Allocate a new cron time state. If 'clone_time_ptr' is not NULL, the
+ * new cron time state will be initialized as a clone of the given cron
+ * time state.
  */
 CRON_API_EXPORT
-cron_time_t *cron_time_alloc(void);
+cron_time_t *cron_time_alloc(const cron_time_t *const clone_time_ptr);
 
 /**
  * Free a cron time state.
@@ -90,5 +92,17 @@ void cron_time_free(cron_time_t *time_ptr);
  */
 CRON_API_EXPORT
 void cron_time_set(cron_time_t *time_ptr, const time_t *timer);
+
+/**
+ * Compare two cron time states.
+ */
+CRON_API_EXPORT
+int cron_time_cmp(const cron_time_t *const a, const cron_time_t *const b);
+
+/**
+ * Increment a cron time state by one minute.
+ */
+CRON_API_EXPORT
+void cron_time_inc(cron_time_t *const cron_time);
 
 #endif
