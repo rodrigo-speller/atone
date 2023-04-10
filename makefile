@@ -77,6 +77,10 @@ ifdef ATONE_BUILD_NUMBER
     CXXFLAGS+=-D "ATONE_BUILD_NUMBER=\"$(ATONE_BUILD_NUMBER)\""
 endif
 
+ifdef ATONE_DEVELOPMENT_MODE
+    CXXFLAGS+=-D "ATONE_DEVELOPMENT_MODE=\"$(ATONE_DEVELOPMENT_MODE)\""
+endif
+
 # artifacts
 
 SOURCES=$(shell find "$(SRCDIR)" -name *.cpp)

@@ -30,11 +30,17 @@ namespace Atone {
 
         Log::info("starting supervisor... (PID=%i)", pid);
 
+#ifndef ATONE_DEVELOPMENT_MODE
+
         // atone supervisor must be executed as an init process (pid = 1)
         // to adopt orphan processes, to be able to terminate, kill and reap them
         if (pid != 1) {
             throw AtoneException("atone must run as init process (pid must be 1)");
         }
+#else
+        Log::warn("atone is running as non-init process (development mode)");
+#endif
+
 
         // execution context
         auto context = Context::FromOptions(options);

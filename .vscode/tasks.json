@@ -30,6 +30,7 @@
                 "make",
                 "-C", "${workspaceFolder}",
                 "DEBUG=1",
+                "ATONE_DEVELOPMENT_MODE=1",
                 "BUILDDIR=build/debug-docker/debian"
             ],
             "group": {
@@ -105,6 +106,7 @@
                 "make",
                 "-C", "${workspaceFolder}",
                 "DEBUG=1",
+                "ATONE_DEVELOPMENT_MODE=1",
                 "BUILDDIR=build/debug-docker/alpine"
             ],
             "group": {
