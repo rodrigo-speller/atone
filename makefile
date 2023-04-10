@@ -5,7 +5,9 @@ atone: build
 build: before-build 3rd-party build-core after-build
 rebuild: clean build
 
-.PHONY: clean build rebuild atone
+FORCE: ;
+
+.PHONY: clean build rebuild atone 3rd-party
 
 # project configuration
 
@@ -99,7 +101,7 @@ before-build:
 
 build-core: $(PCHS) $(OUTDIR)/atone
 
-$(OUTDIR)/atone: $(OBJECTS)
+$(OUTDIR)/atone: $(OBJECTS) 3rd-party
 	@echo "  Linking $@"
 	@$(CXX) $(LDFLAGS) -o $(OUTDIR)/atone $(OBJECTS) $(LDLIBS)
 
@@ -121,15 +123,15 @@ after-build:
   3rd-party/optparse/$(BUILDDIR)/$(TARGET)/bin/liboptparse.a \
   3rd-party/yaml-cpp/$(BUILDDIR)/$(TARGET)/bin/libyaml-cpp.a
 
-3rd-party/cron/$(BUILDDIR)/$(TARGET)/bin/libcron.a:
+3rd-party/cron/$(BUILDDIR)/$(TARGET)/bin/libcron.a: FORCE
 	@echo "Building libcron"
 	@$(MAKE) -C 3rd-party/cron
 
-3rd-party/optparse/$(BUILDDIR)/$(TARGET)/bin/liboptparse.a:
+3rd-party/optparse/$(BUILDDIR)/$(TARGET)/bin/liboptparse.a: FORCE
 	@echo "Building optparse"
 	@$(MAKE) -C 3rd-party/optparse
 
-3rd-party/yaml-cpp/$(BUILDDIR)/$(TARGET)/bin/libyaml-cpp.a:
+3rd-party/yaml-cpp/$(BUILDDIR)/$(TARGET)/bin/libyaml-cpp.a: FORCE
 	@echo "Building yaml-cpp"
 	@$(MAKE) -C 3rd-party/yaml-cpp
 
