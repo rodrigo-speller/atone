@@ -126,6 +126,8 @@ services:
     restart: always
 ```
 
+To learn more about the configuration file, see the [Atone configuration file](docs/atone-configuration-file.md).
+
 # How to code, build, run and debug
 
 Atone project is written in C++ and uses the [Makefile](https://www.gnu.org/software/make/) build system. This project
