@@ -17,6 +17,10 @@ To learn more about all the features of Atone, see the list of features.
 * Automatic service restart
 * Signal forwarding
 
+## Future features
+
+* Services healthcheck
+
 # How to install
 
 To install Atone, you must execute the *install script* or download a specific version from the [releases page](https://github.com/rodrigo-speller/atone/releases).
