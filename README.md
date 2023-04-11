@@ -11,14 +11,11 @@ To learn more about all the features of Atone, see the list of features.
 
 * Orphan-zombie process reaping
 * Services spawn
+* Services schedule
 * Single-service mode
 * Multi-service mode
 * Automatic service restart
 * Signal forwarding
-
-## Future features
-
-* Service schedule
 
 # How to install
 
@@ -124,6 +121,13 @@ services:
   ten-seconds-svc:
     command: /bin/sh -c "echo 'Service 2'; sleep 10"
     restart: always
+
+  # An example of a service scheduled to be executed every 5 minutes.
+  # The service sleeps for 10 seconds then exits.
+  scheduled-svc:
+    # The schedule is a cron expression.
+    schedule: "*/5 * * * *"
+    command: /bin/sh -c "echo 'Scheduled service'; sleep 10"
 ```
 
 To learn more about the configuration file, see the [Atone configuration file](docs/atone-configuration-file.md).
