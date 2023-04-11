@@ -19,6 +19,9 @@ namespace Atone {
             /** Signals to restore after process fork. */
             sigset_t spawnSigset = sigset_t();
 
+            /** Timer used to implement the scheduler. */
+            timer_t schedulerTimer = nullptr;
+
             Supervisor();
             ~Supervisor();
             static void RequireInstance();
@@ -36,6 +39,7 @@ namespace Atone {
             static bool SendSignal(const pid_t pid, const int signum);
             static int WaitSignal(siginfo_t *info);
             static int WaitSignal(siginfo_t *info, const timespec &timeout);
+            static void RequestSchedulerTick(time_t next_tick);
     };
 
 }

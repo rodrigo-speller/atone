@@ -6,12 +6,16 @@
 #include "Supervisor.h"
 
 #include "logging/Log.h"
+#include "utils/constants.h"
 #include "utils/time.h"
 
 namespace Atone {
+
     Supervisor *Supervisor::instance = nullptr;
 
     Supervisor::Supervisor() {
+
+        // setup the signal handler
 
         // Atone must handle all possible signals
         if (sigfillset(&atoneSigset)) {
@@ -30,6 +34,18 @@ namespace Atone {
             signal(i, UnexpectedSignalHandler);
         }
 
+        // setup the scheduler
+
+        sigevent scheduler_event;
+        scheduler_event.sigev_notify = SIGEV_SIGNAL;
+        scheduler_event.sigev_signo = ATONE_SCHEDULER_SIGNAL;
+        scheduler_event.sigev_value.sival_ptr = &schedulerTimer;
+
+        if (timer_create(CLOCK_REALTIME, &scheduler_event, &schedulerTimer) != 0) {
+            auto _errno = errno;
+            Log::crit("timer create failed", strerror(_errno));
+            throw std::system_error(_errno, std::system_category(), "timer create failed");
+        }
     }
 
     Supervisor::~Supervisor() {
@@ -49,6 +65,10 @@ namespace Atone {
         if (instance == nullptr) {
             Log::debug("supervisor: initializing...");
             instance = new Supervisor();
+
+            // Request the first scheduler tick
+            RequestSchedulerTick(0);
+
             Log::debug("supervisor: ready");
         }
         else {
@@ -76,6 +96,26 @@ namespace Atone {
 
     void Supervisor::UnexpectedSignalHandler(int signum) {
         Log::crit("unexpected signal received: %s (%d)", strsignal(signum), signum);
+    }
+
+    /**
+     * Request a scheduler tick at given absolute time. This replaces any
+     * previous request.
+     */
+    void Supervisor::RequestSchedulerTick(time_t time) {
+        RequireInstance();
+
+        itimerspec tspec;
+        tspec.it_interval = {};
+
+        tspec.it_value.tv_sec = time;
+        tspec.it_value.tv_nsec = 1; /* to avoid disarming the timer */
+
+        if (timer_settime(instance->schedulerTimer, TIMER_ABSTIME, &tspec, NULL) == -1) {
+            auto _errno = errno;
+            Log::crit("timer settime failed", strerror(_errno));
+            throw std::system_error(_errno, std::system_category(), "timer settime failed");
+        }
     }
 
     /**

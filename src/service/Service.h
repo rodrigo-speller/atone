@@ -10,6 +10,7 @@ namespace Atone {
 }
 
 #include "config/ServiceConfig.h"
+#include "service/ServiceScheduler.h"
 #include "service/ServicesManager.h"
 #include "service/ServiceStatus.h"
 
@@ -43,6 +44,9 @@ namespace Atone {
     /** The service configuration */
     const ServiceConfig config;
 
+    /** The service scheduler. */
+    const ServiceScheduler *_scheduler;
+
     /** The service execution state. */
     ServiceExecutionState state;
 
@@ -70,6 +74,11 @@ namespace Atone {
      */
     Service(const ServicesManager *manager, const ServiceConfig &config);
 
+    /**
+     * Destroy the Service instance.
+     */
+    ~Service();
+
     ////////////////////////////////////////////////////////////////////
 
     /**
@@ -95,12 +104,19 @@ namespace Atone {
      * @return The service dependencies.
      */
     vector<string> dependsOn() const;
-    
+
     /**
-     * Gets the service restart mode.
-     * @return The service restart mode.
+     * Gets the service restart policy.
+     * @return The service restart policy.
      */
-    ServiceRestartMode restartMode() const;
+    ServiceRestartPolicy restartPolicy() const;
+
+    /**
+     * Gets the service scheduler to check if the service should be started
+     * based on the current time.
+     * @return The service scheduler.
+     */
+    const ServiceScheduler *scheduler() const;
 
     ////////////////////////////////////////////////////////////////////
 

@@ -42,14 +42,11 @@ namespace Atone {
 
     void OutputLogger::print_time()
     {
-        timeval tv;
-        gettimeofday(&tv, 0);
+        timespec time;
+        clock_gettime(CLOCK_REALTIME, &time);
 
-        time_t rawtime = tv.tv_sec;
         struct tm *timeinfo;
-
-        time(&rawtime);
-        timeinfo = localtime(&rawtime);
+        timeinfo = localtime(&time.tv_sec);
         printf(
             "[%i-%02i-%02i %02i:%02i:%02i.%03i]",
             timeinfo->tm_year + 1900,
@@ -58,7 +55,7 @@ namespace Atone {
             timeinfo->tm_hour,
             timeinfo->tm_min,
             timeinfo->tm_sec,
-            (int)tv.tv_usec / 1000
+            (int)time.tv_nsec / 1000000
         );
     }
 

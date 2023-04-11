@@ -84,7 +84,10 @@ namespace Atone {
         if (depends_on) SetDependsOn(svcConfig, depends_on);
 
         auto restart = config["restart"];
-        if (restart) SetRestartMode(svcConfig, restart);
+        if (restart) SetRestartPolicy(svcConfig, restart);
+
+        auto schedule = config["schedule"];
+        if (schedule) SetSchedule(svcConfig, schedule);
 
         return svcConfig;
     }
@@ -136,34 +139,67 @@ namespace Atone {
         target.depends_on = value;
     }
 
-    void YamlConfigParser::SetRestartMode(ServiceConfig &target, const YAML::Node &restart) {
+    void YamlConfigParser::SetRestartPolicy(ServiceConfig &target, const YAML::Node &restart) {
         switch (restart.Type()) {
             case YAML::NodeType::Null:
             case YAML::NodeType::Undefined:
-                target.restart = ServiceRestartMode::No;
+                target.restart = ServiceRestartPolicy::No;
                 return;
 
             case YAML::NodeType::Scalar:
                 break;
 
             default:
-                throw AtoneException("invalid restart");
+                throw AtoneException("invalid restart policy");
         }
 
         auto str_value = restart.as<std::string>();
 
-        ServiceRestartMode value;
+        ServiceRestartPolicy value;
         if (str_value == "no")
-            value = ServiceRestartMode::No;
+            value = ServiceRestartPolicy::No;
         else if (str_value == "always")
-            value = ServiceRestartMode::Always;
+            value = ServiceRestartPolicy::Always;
         else if (str_value == "on-failure")
-            value = ServiceRestartMode::OnFailure;
+            value = ServiceRestartPolicy::OnFailure;
         else if (str_value == "unless-stopped")
-            value = ServiceRestartMode::UnlessStopped;
+            value = ServiceRestartPolicy::UnlessStopped;
         else
-            throw AtoneException("invalid restart");
+            throw AtoneException("invalid restart policy");
 
         target.restart = value;
     }
+
+    void YamlConfigParser::SetSchedule(ServiceConfig &target, const YAML::Node &schedule) {
+        switch (schedule.Type()) {
+            case YAML::NodeType::Null:
+            case YAML::NodeType::Undefined:
+                target.depends_on = std::vector<std::string>();
+                return;
+
+            case YAML::NodeType::Scalar:
+                target.schedule = std::vector<std::string>{schedule.as<std::string>()};
+                return;
+
+            case YAML::NodeType::Sequence:
+                break;
+
+            default:
+                throw AtoneException("invalid schedule");
+        }
+
+        size_t sz = schedule.size();
+        auto value = std::vector<std::string>(sz);
+        for (size_t i = 0; i < sz; i++) {
+            auto node = schedule[i];
+
+            if (node.Type() != YAML::NodeType::Scalar)
+                throw AtoneException("invalid schedule");
+
+            value[i] = node.as<std::string>();
+        }
+
+        target.schedule = value;
+    }
+
 }

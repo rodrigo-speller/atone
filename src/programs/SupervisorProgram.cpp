@@ -11,6 +11,7 @@
 #include "logging/Log.h"
 #include "system/Supervisor.h"
 #include "utils/constants.h"
+#include "utils/CronTime.h"
 #include "utils/time.h"
 
 namespace Atone {
@@ -29,11 +30,17 @@ namespace Atone {
 
         Log::info("starting supervisor... (PID=%i)", pid);
 
+#ifndef ATONE_DEVELOPMENT_MODE
+
         // atone supervisor must be executed as an init process (pid = 1)
         // to adopt orphan processes, to be able to terminate, kill and reap them
         if (pid != 1) {
             throw AtoneException("atone must run as init process (pid must be 1)");
         }
+#else
+        Log::warn("atone is running as non-init process (development mode)");
+#endif
+
 
         // execution context
         auto context = Context::FromOptions(options);
@@ -71,7 +78,7 @@ namespace Atone {
         }
 
         // starts the services
-        services->Start();
+        services->Bootstrap();
     }
 
     /**
@@ -80,6 +87,8 @@ namespace Atone {
      */
     bool SupervisorProgram::MainLoop(Context &context) {
         auto &services = context.services;
+
+        CronTime *last_schedule_time = nullptr;
 
         // wait signal loop
         while (true) {
@@ -117,6 +126,35 @@ namespace Atone {
                 }
                 // any other signal
                 default:
+                    if (signum == ATONE_SCHEDULER_SIGNAL) {
+                        Log::debug("signal received: %s", strsignal(signum));
+
+                        timespec time;
+                        clock_gettime(CLOCK_REALTIME, &time);
+
+                        if (last_schedule_time == nullptr) {
+                            last_schedule_time = new CronTime(&time.tv_sec);
+                            services->CheckSchedule(last_schedule_time, last_schedule_time);
+                        } else {
+                            auto previous_time = last_schedule_time;
+                            auto current_time = new CronTime(&time.tv_sec);
+                            last_schedule_time = current_time;
+
+                            if (*current_time > *previous_time) {
+                                previous_time->IncrementTick();
+                                services->CheckSchedule(previous_time, current_time);
+                            }
+
+                            delete previous_time;
+                        }
+
+                        // schedule next tick
+                        time_t next_tick = time.tv_sec - (time.tv_sec % 60) + 60;
+                        Supervisor::RequestSchedulerTick(next_tick);
+
+                        break;
+                    }
+
                     Log::debug("unhandled signal received: %s", strsignal(signum));
                     break;
             }

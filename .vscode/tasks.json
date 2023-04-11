@@ -13,6 +13,158 @@
                 "kind": "build",
                 "isDefault": true
             },
+        },
+        // Debian
+        {
+            "label": "Atone: Build (debug in container - Debian)",
+            "dependsOn": [ "Atone: Build Debug Container Image (Debian)" ],
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                // docker
+                "run",
+                "--privileged",
+                "--volume", "${workspaceFolder}:${workspaceFolder}",
+                "atone_debug_debian",
+                // make
+                "make",
+                "-C", "${workspaceFolder}",
+                "DEBUG=1",
+                "ATONE_DEVELOPMENT_MODE=1",
+                "BUILDDIR=build/debug-docker/debian"
+            ],
+            "group": {
+                "kind": "build",
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+        },
+        {
+            "label": "Atone: Clean (debug in container - Debian)",
+            "dependsOn": [ "Atone: Build Debug Container Image (Debian)" ],
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                // docker
+                "run",
+                "--privileged",
+                "--volume", "${workspaceFolder}:${workspaceFolder}",
+                "atone_debug_debian",
+                // make
+                "make",
+                "-C", "${workspaceFolder}",
+                "DEBUG=1",
+                "BUILDDIR=build/debug-docker/debian",
+                "clean-all"
+            ],
+            "group": {
+                "kind": "none",
+            },
+        },
+        {
+            "label": "Atone: Build Debug Container Image (Debian)",
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                // docker
+                "build",
+                "--tag", "atone_debug_debian",
+                "-",
+                "<",
+                "${workspaceFolder}/Dockerfile.debug-debian"
+            ],
+            "group": {
+                "kind": "build",
+            }
+        },
+        // Alpine
+        {
+            "label": "Atone: Build (debug in container - Alpine)",
+            "dependsOn": [ "Atone: Build Debug Container Image (Alpine)" ],
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                // docker
+                "run",
+                "--privileged",
+                "--volume", "${workspaceFolder}:${workspaceFolder}",
+                "atone_debug_alpine",
+                // make
+                "make",
+                "-C", "${workspaceFolder}",
+                "DEBUG=1",
+                "ATONE_DEVELOPMENT_MODE=1",
+                "BUILDDIR=build/debug-docker/alpine"
+            ],
+            "group": {
+                "kind": "build",
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+        },
+        {
+            "label": "Atone: Clean (debug in container - Alpine)",
+            "dependsOn": [ "Atone: Build Debug Container Image (Alpine)" ],
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                // docker
+                "run",
+                "--privileged",
+                "--volume", "${workspaceFolder}:${workspaceFolder}",
+                "atone_debug_alpine",
+                // make
+                "make",
+                "-C", "${workspaceFolder}",
+                "DEBUG=1",
+                "BUILDDIR=build/debug-docker/alpine",
+                "clean-all"
+            ],
+            "group": {
+                "kind": "none",
+            },
+        },
+        {
+            "label": "Atone: Build Debug Container Image (Alpine)",
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                // docker
+                "build",
+                "--tag", "atone_debug_alpine",
+                "-",
+                "<",
+                "${workspaceFolder}/Dockerfile.debug-alpine"
+            ],
+            "group": {
+                "kind": "build",
+            }
         }
     ],
     "version": "2.0.0"

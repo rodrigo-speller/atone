@@ -5,7 +5,7 @@
 
 #include "atone.h"
 
-#include "service/ServiceRestartMode.h"
+#include "service/ServiceRestartPolicy.h"
 
 namespace Atone {
 
@@ -17,13 +17,11 @@ namespace Atone {
             size_t argc = 0;
             shared_ptr<char *> argv = NULL;
             std::vector<std::string> depends_on;
-            ServiceRestartMode restart = ServiceRestartMode::No;
+            ServiceRestartPolicy restart = ServiceRestartPolicy::No;
+            std::vector<std::string> schedule;
 
             void SetCommandArgs(const std::string &command);
             void SetCommandArgs(const size_t argc, char **argv);
-
-        private:
-            void FreeCommandArgs();
     };
 
 }

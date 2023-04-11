@@ -8,6 +8,7 @@
 #include "exception/AtoneException.h"
 #include "logging/Log.h"
 #include "service/Service.h"
+#include "utils/CronTime.h"
 
 namespace Atone {
     /**
@@ -85,10 +86,13 @@ namespace Atone {
     /**
      * Request to start all services.
      */
-    void ServicesManager::Start() {
+    void ServicesManager::Bootstrap() {
         for (auto entry : services) {
             auto service = entry.second;
-            service->Start();
+
+            if (service->scheduler()->onBoot()) {
+                service->Start();
+            }
         }
     }
 
@@ -154,4 +158,35 @@ namespace Atone {
 
         return false;
     }
+
+    /**
+     * Request to check if any scheduled service must be started. The services
+     * will schedule will be checked between the begin and end time (inclusive).
+     * 
+     * The services will be started in the order they are scheduled.
+     */
+    void ServicesManager::CheckSchedule(CronTime *begin, CronTime *end) {
+        auto fulfill_services_set = unordered_set<Service*>();
+        auto fulfill_services = vector<Service*>();
+
+        auto safe_begin = *begin;
+        while (safe_begin <= *end) {
+            for (auto entry : services) {
+                auto service = entry.second;
+
+                if (service->scheduler()->CheckTime(&safe_begin)) {
+                    if (fulfill_services_set.insert(service).second) {
+                        fulfill_services.push_back(service);
+                    }
+                }
+            }
+
+            safe_begin.IncrementTick();
+        }
+
+        for (auto service : fulfill_services) {
+            service->Start();
+        }
+    }
+
 }

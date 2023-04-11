@@ -30,11 +30,13 @@ using namespace std;
 #include <time.h>
 #include <unistd.h>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <wordexp.h>
 
 // 3rd-party libs
 
+#include "cronutils.h"
 #include "optparse.h"
 #include "yaml-cpp/yaml.h"
 
