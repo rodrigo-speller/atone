@@ -31,7 +31,7 @@ A specific version can be installed by executing the following command:
 
 ```sh
 # Replace the version number with the desired version tag
-curl -sSL https://github.com/rodrigo-speller/atone/releases/download/v0.0.5/atone-install.sh | sh
+curl -sSL https://github.com/rodrigo-speller/atone/releases/download/v0.0.7/atone-install.sh | sh
 ```
 
 # How to use
