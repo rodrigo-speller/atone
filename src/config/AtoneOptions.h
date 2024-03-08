@@ -38,7 +38,7 @@ namespace Atone {
             // logging
 
             LoggerFactory loggerFactory = DefaultLoggerFactory;
-            LogLevel logLevel = LogLevel::Trace;
+            LogLevel logLevel = LogLevel::Information;
 
             static AtoneOptions FromArgs(size_t argc, char **argv);
         private:

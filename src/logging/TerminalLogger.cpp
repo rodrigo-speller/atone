@@ -12,7 +12,7 @@
 namespace Atone {
 
     TerminalLogger::TerminalLogger() {
-        this->minimumLevel = LogLevel::Trace;
+        this->minimumLevel = LogLevel::Information;
     }
 
     TerminalLogger::TerminalLogger(LogLevel minimumLevel) {

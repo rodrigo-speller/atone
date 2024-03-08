@@ -11,7 +11,7 @@
 namespace Atone {
 
     OutputLogger::OutputLogger() {
-        this->minimumLevel = LogLevel::Trace;
+        this->minimumLevel = LogLevel::Information;
     }
 
     OutputLogger::OutputLogger(LogLevel minimumLevel) {
