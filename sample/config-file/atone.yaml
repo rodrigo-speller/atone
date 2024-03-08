@@ -6,12 +6,12 @@ settings:
 services:
     sleep-3:
         command: sleep 3
-        restart: always
 
     sleep-5:
+        schedule:
+            - '0 02 * * *'
         command: sleep 5
         depends_on: [ sleep-3 ]
-        restart: always
 
     bash:
         command: bash -c ls
